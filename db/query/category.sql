@@ -1,4 +1,5 @@
 
+
 -- name: CreateCategory :one
 INSERT INTO categories (
   name,
@@ -28,16 +29,15 @@ SELECT * FROM categories WHERE name ILIKE '%' || $1 || '%' ORDER BY id LIMIT $2 
 -- name: CreateBrandCategory :one
 INSERT INTO brand_categories (
   brand_id,
-  name,
-  image
+  category_id, 
+  name
 ) VALUES ($1, $2, $3)
 RETURNING *;
 
 -- name: UpdateBrandCategory :one
 UPDATE brand_categories SET
-  name = $2,
-  image = $3
-WHERE brand_id = $1 AND id = $4
+  name = $2
+WHERE brand_id = $1 AND id = $3
 RETURNING *;
 
 -- name: GetBrandCategory :one

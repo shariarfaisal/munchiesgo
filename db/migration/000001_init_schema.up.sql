@@ -1,41 +1,28 @@
 CREATE TABLE "vendors" (
   "id" bigserial PRIMARY KEY,
   "name" varchar NOT NULL,
-  "email" varchar NOT NULL,
+  "email" varchar UNIQUE NOT NULL,
   "phone" varchar NOT NULL,
   "payment_info" jsonb NOT NULL,
   "social_links" jsonb NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
-CREATE TABLE "vendor_permissions" (
-  "id" int PRIMARY KEY,
-  "name" varchar,
-  "created_at" timestamptz NOT NULL DEFAULT (now())
-);
-
-CREATE TABLE "vendor_user_permissions" (
-  "id" bigserial PRIMARY KEY,
-  "user_id" int NOT NULL,
-  "permission_id" int NOT NULL,
-  "created_at" timestamptz NOT NULL DEFAULT (now())
-);
-
 CREATE TABLE "vendor_users" (
-  "id" int PRIMARY KEY,
-  "username" varchar,
+  "id" bigserial PRIMARY KEY,
+  "username" varchar NOT NULL,
   "full_name" varchar NOT NULL,
   "email" varchar UNIQUE NOT NULL,
   "hashed_password" varchar NOT NULL,
   "password_changed_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z',
   "role" varchar NOT NULL,
-  "vendor_id" int NOT NULL,
+  "vendor_id" bigint NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "operation_times" (
   "id" bigserial PRIMARY KEY,
-  "brand_id" int NOT NULL,
+  "brand_id" bigint NOT NULL,
   "day_of_week" int NOT NULL,
   "start_time" time NOT NULL,
   "end_time" time NOT NULL,
@@ -44,15 +31,15 @@ CREATE TABLE "operation_times" (
 
 CREATE TABLE "zones" (
   "id" int PRIMARY KEY,
-  "name" varchar,
-  "boundary" polygon NOT NULL,
+  "name" varchar NOT NULL,
+  "boundary" Polygon NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "brand_zones" (
   "id" int PRIMARY KEY,
-  "brand_id" int NOT NULL,
-  "zone_id" int NOT NULL,
+  "brand_id" bigint NOT NULL,
+  "zone_id" bigint NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
@@ -72,7 +59,7 @@ CREATE TABLE "brands" (
   "prefix" varchar NOT NULL,
   "status" varchar NOT NULL,
   "availability" bool NOT NULL,
-  "location" point NOT NULL,
+  "location" Point NOT NULL,
   "address" varchar NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
@@ -87,8 +74,8 @@ CREATE TABLE "categories" (
 CREATE TABLE "brand_categories" (
   "id" bigserial PRIMARY KEY,
   "brand_id" bigint NOT NULL,
+  "category_id" bigint NOT NULL,
   "name" varchar NOT NULL,
-  "image" varchar NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
@@ -104,6 +91,7 @@ CREATE TABLE "products" (
   "status" varchar NOT NULL,
   "brand_id" bigint NOT NULL,
   "availability" bool NOT NULL,
+  "use_inventory" bool NOT NULL DEFAULT false,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
 );
@@ -146,12 +134,6 @@ CREATE TABLE "product_variant_items" (
 
 CREATE INDEX ON "vendors" ("name");
 
-CREATE INDEX ON "vendor_user_permissions" ("user_id");
-
-CREATE INDEX ON "vendor_user_permissions" ("permission_id");
-
-CREATE INDEX ON "vendor_user_permissions" ("user_id", "permission_id");
-
 CREATE INDEX ON "vendor_users" ("username");
 
 CREATE INDEX ON "vendor_users" ("email");
@@ -180,9 +162,17 @@ CREATE INDEX ON "categories" ("name");
 
 CREATE INDEX ON "brand_categories" ("brand_id");
 
+CREATE INDEX ON "brand_categories" ("category_id");
+
+CREATE INDEX ON "brand_categories" ("brand_id", "category_id");
+
 CREATE INDEX ON "products" ("slug");
 
 CREATE INDEX ON "products" ("brand_id");
+
+CREATE INDEX ON "products" ("category_id");
+
+CREATE INDEX ON "products" ("brand_id", "category_id");
 
 CREATE INDEX ON "inventory_history" ("product_id");
 
@@ -198,10 +188,6 @@ CREATE INDEX ON "product_variant_items" ("product_id", "variant_id");
 
 COMMENT ON COLUMN "inventory_history"."type" IS 'it would be like input, sold, restock, damage etc';
 
-ALTER TABLE "vendor_user_permissions" ADD FOREIGN KEY ("user_id") REFERENCES "vendor_users" ("id");
-
-ALTER TABLE "vendor_user_permissions" ADD FOREIGN KEY ("permission_id") REFERENCES "vendor_permissions" ("id");
-
 ALTER TABLE "vendor_users" ADD FOREIGN KEY ("vendor_id") REFERENCES "vendors" ("id");
 
 ALTER TABLE "operation_times" ADD FOREIGN KEY ("brand_id") REFERENCES "brands" ("id");
@@ -212,7 +198,9 @@ ALTER TABLE "brand_zones" ADD FOREIGN KEY ("zone_id") REFERENCES "zones" ("id");
 
 ALTER TABLE "brands" ADD FOREIGN KEY ("vendor_id") REFERENCES "vendors" ("id");
 
-ALTER TABLE "brand_categories" ADD FOREIGN KEY ("brand_id") REFERENCES "categories" ("id");
+ALTER TABLE "brand_categories" ADD FOREIGN KEY ("brand_id") REFERENCES "brands" ("id");
+
+ALTER TABLE "brand_categories" ADD FOREIGN KEY ("category_id") REFERENCES "categories" ("id");
 
 ALTER TABLE "products" ADD FOREIGN KEY ("category_id") REFERENCES "brand_categories" ("id");
 

@@ -5,7 +5,6 @@
 package db
 
 import (
-	"database/sql"
 	"encoding/json"
 	"time"
 )
@@ -32,17 +31,17 @@ type Brand struct {
 }
 
 type BrandCategory struct {
-	ID        int64     `json:"id"`
-	BrandID   int64     `json:"brand_id"`
-	Name      string    `json:"name"`
-	Image     string    `json:"image"`
-	CreatedAt time.Time `json:"created_at"`
+	ID         int64     `json:"id"`
+	BrandID    int64     `json:"brand_id"`
+	CategoryID int64     `json:"category_id"`
+	Name       string    `json:"name"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type BrandZone struct {
 	ID        int32     `json:"id"`
-	BrandID   int32     `json:"brand_id"`
-	ZoneID    int32     `json:"zone_id"`
+	BrandID   int64     `json:"brand_id"`
+	ZoneID    int64     `json:"zone_id"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -64,7 +63,7 @@ type InventoryHistory struct {
 
 type OperationTime struct {
 	ID        int64     `json:"id"`
-	BrandID   int32     `json:"brand_id"`
+	BrandID   int64     `json:"brand_id"`
 	DayOfWeek int32     `json:"day_of_week"`
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
@@ -83,6 +82,7 @@ type Product struct {
 	Status       string    `json:"status"`
 	BrandID      int64     `json:"brand_id"`
 	Availability bool      `json:"availability"`
+	UseInventory bool      `json:"use_inventory"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
@@ -125,34 +125,21 @@ type Vendor struct {
 	CreatedAt   time.Time       `json:"created_at"`
 }
 
-type VendorPermission struct {
-	ID        int32          `json:"id"`
-	Name      sql.NullString `json:"name"`
-	CreatedAt time.Time      `json:"created_at"`
-}
-
 type VendorUser struct {
-	ID                int32          `json:"id"`
-	Username          sql.NullString `json:"username"`
-	FullName          string         `json:"full_name"`
-	Email             string         `json:"email"`
-	HashedPassword    string         `json:"hashed_password"`
-	PasswordChangedAt time.Time      `json:"password_changed_at"`
-	Role              string         `json:"role"`
-	VendorID          int32          `json:"vendor_id"`
-	CreatedAt         time.Time      `json:"created_at"`
-}
-
-type VendorUserPermission struct {
-	ID           int64     `json:"id"`
-	UserID       int32     `json:"user_id"`
-	PermissionID int32     `json:"permission_id"`
-	CreatedAt    time.Time `json:"created_at"`
+	ID                int64     `json:"id"`
+	Username          string    `json:"username"`
+	FullName          string    `json:"full_name"`
+	Email             string    `json:"email"`
+	HashedPassword    string    `json:"hashed_password"`
+	PasswordChangedAt time.Time `json:"password_changed_at"`
+	Role              string    `json:"role"`
+	VendorID          int64     `json:"vendor_id"`
+	CreatedAt         time.Time `json:"created_at"`
 }
 
 type Zone struct {
-	ID        int32          `json:"id"`
-	Name      sql.NullString `json:"name"`
-	Boundary  interface{}    `json:"boundary"`
-	CreatedAt time.Time      `json:"created_at"`
+	ID        int32       `json:"id"`
+	Name      string      `json:"name"`
+	Boundary  interface{} `json:"boundary"`
+	CreatedAt time.Time   `json:"created_at"`
 }

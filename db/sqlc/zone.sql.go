@@ -25,7 +25,7 @@ const countZonesByBrandID = `-- name: CountZonesByBrandID :one
 SELECT COUNT(*) FROM zones WHERE id IN (SELECT zone_id FROM brand_zones WHERE brand_id = $1)
 `
 
-func (q *Queries) CountZonesByBrandID(ctx context.Context, brandID int32) (int64, error) {
+func (q *Queries) CountZonesByBrandID(ctx context.Context, brandID int64) (int64, error) {
 	row := q.queryRow(ctx, q.countZonesByBrandIDStmt, countZonesByBrandID, brandID)
 	var count int64
 	err := row.Scan(&count)
@@ -41,8 +41,8 @@ RETURNING id, brand_id, zone_id, created_at
 `
 
 type CreateBrandZoneParams struct {
-	BrandID int32 `json:"brand_id"`
-	ZoneID  int32 `json:"zone_id"`
+	BrandID int64 `json:"brand_id"`
+	ZoneID  int64 `json:"zone_id"`
 }
 
 func (q *Queries) CreateBrandZone(ctx context.Context, arg CreateBrandZoneParams) (BrandZone, error) {
@@ -68,8 +68,8 @@ RETURNING id, name, boundary, created_at
 `
 
 type CreateZoneParams struct {
-	Name     sql.NullString `json:"name"`
-	Boundary interface{}    `json:"boundary"`
+	Name     string      `json:"name"`
+	Boundary interface{} `json:"boundary"`
 }
 
 // CREATE TABLE "zones" (
@@ -105,8 +105,8 @@ DELETE FROM brand_zones WHERE brand_id = $1 AND zone_id = $2
 `
 
 type DeleteBrandZoneParams struct {
-	BrandID int32 `json:"brand_id"`
-	ZoneID  int32 `json:"zone_id"`
+	BrandID int64 `json:"brand_id"`
+	ZoneID  int64 `json:"zone_id"`
 }
 
 func (q *Queries) DeleteBrandZone(ctx context.Context, arg DeleteBrandZoneParams) error {
@@ -144,7 +144,7 @@ SELECT id, brand_id, zone_id, created_at FROM brand_zones WHERE brand_id = $1 OR
 `
 
 type ListBrandZonesParams struct {
-	BrandID int32 `json:"brand_id"`
+	BrandID int64 `json:"brand_id"`
 	Limit   int32 `json:"limit"`
 	Offset  int32 `json:"offset"`
 }
@@ -219,7 +219,7 @@ SELECT id, name, boundary, created_at FROM zones WHERE id IN (SELECT zone_id FRO
 `
 
 type ListZonesByBrandIDParams struct {
-	BrandID int32 `json:"brand_id"`
+	BrandID int64 `json:"brand_id"`
 	Limit   int32 `json:"limit"`
 	Offset  int32 `json:"offset"`
 }
@@ -258,9 +258,9 @@ WHERE name ILIKE $1 ORDER BY id LIMIT $2 OFFSET $3
 `
 
 type SearchZonesParams struct {
-	Name   sql.NullString `json:"name"`
-	Limit  int32          `json:"limit"`
-	Offset int32          `json:"offset"`
+	Name   string `json:"name"`
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
 }
 
 func (q *Queries) SearchZones(ctx context.Context, arg SearchZonesParams) ([]Zone, error) {
@@ -297,10 +297,10 @@ WHERE id IN (SELECT zone_id FROM brand_zones WHERE brand_id = $2) AND name ILIKE
 `
 
 type SearchZonesByBrandIDParams struct {
-	Name    sql.NullString `json:"name"`
-	BrandID int32          `json:"brand_id"`
-	Limit   int32          `json:"limit"`
-	Offset  int32          `json:"offset"`
+	Name    string `json:"name"`
+	BrandID int64  `json:"brand_id"`
+	Limit   int32  `json:"limit"`
+	Offset  int32  `json:"offset"`
 }
 
 func (q *Queries) SearchZonesByBrandID(ctx context.Context, arg SearchZonesByBrandIDParams) ([]Zone, error) {
@@ -391,7 +391,7 @@ ORDER BY id LIMIT $4 OFFSET $5
 type SearchZonesByGeoPointAndBrandIDParams struct {
 	Column1 sql.NullString `json:"column_1"`
 	Column2 sql.NullString `json:"column_2"`
-	BrandID int32          `json:"brand_id"`
+	BrandID int64          `json:"brand_id"`
 	Limit   int32          `json:"limit"`
 	Offset  int32          `json:"offset"`
 }
@@ -478,7 +478,7 @@ ORDER BY id LIMIT $3 OFFSET $4
 
 type SearchZonesByGeoPolygonAndBrandIDParams struct {
 	Column1 sql.NullString `json:"column_1"`
-	BrandID int32          `json:"brand_id"`
+	BrandID int64          `json:"brand_id"`
 	Limit   int32          `json:"limit"`
 	Offset  int32          `json:"offset"`
 }
@@ -525,9 +525,9 @@ RETURNING id, name, boundary, created_at
 `
 
 type UpdateZoneParams struct {
-	ID       int32          `json:"id"`
-	Name     sql.NullString `json:"name"`
-	Boundary interface{}    `json:"boundary"`
+	ID       int32       `json:"id"`
+	Name     string      `json:"name"`
+	Boundary interface{} `json:"boundary"`
 }
 
 func (q *Queries) UpdateZone(ctx context.Context, arg UpdateZoneParams) (Zone, error) {

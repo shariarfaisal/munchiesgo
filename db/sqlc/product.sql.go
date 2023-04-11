@@ -92,7 +92,7 @@ INSERT INTO products (
   brand_id,
   availability
 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-RETURNING id, type, name, category_id, slug, image, details, price, status, brand_id, availability, created_at, updated_at
+RETURNING id, type, name, category_id, slug, image, details, price, status, brand_id, availability, use_inventory, created_at, updated_at
 `
 
 type CreateProductParams struct {
@@ -134,6 +134,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		&i.Status,
 		&i.BrandID,
 		&i.Availability,
+		&i.UseInventory,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -230,7 +231,7 @@ func (q *Queries) DeleteProductVariantItem(ctx context.Context, id int64) error 
 }
 
 const getProduct = `-- name: GetProduct :one
-SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, created_at, updated_at FROM products WHERE id = $1
+SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, use_inventory, created_at, updated_at FROM products WHERE id = $1
 `
 
 func (q *Queries) GetProduct(ctx context.Context, id int64) (Product, error) {
@@ -248,6 +249,7 @@ func (q *Queries) GetProduct(ctx context.Context, id int64) (Product, error) {
 		&i.Status,
 		&i.BrandID,
 		&i.Availability,
+		&i.UseInventory,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -255,7 +257,7 @@ func (q *Queries) GetProduct(ctx context.Context, id int64) (Product, error) {
 }
 
 const getProductBySlug = `-- name: GetProductBySlug :one
-SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, created_at, updated_at FROM products WHERE slug = $1
+SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, use_inventory, created_at, updated_at FROM products WHERE slug = $1
 `
 
 func (q *Queries) GetProductBySlug(ctx context.Context, slug string) (Product, error) {
@@ -273,6 +275,7 @@ func (q *Queries) GetProductBySlug(ctx context.Context, slug string) (Product, e
 		&i.Status,
 		&i.BrandID,
 		&i.Availability,
+		&i.UseInventory,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -426,7 +429,7 @@ func (q *Queries) ListProductVariants(ctx context.Context, arg ListProductVarian
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, created_at, updated_at FROM products ORDER BY id LIMIT $1 OFFSET $2
+SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, use_inventory, created_at, updated_at FROM products ORDER BY id LIMIT $1 OFFSET $2
 `
 
 type ListProductsParams struct {
@@ -455,6 +458,7 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 			&i.Status,
 			&i.BrandID,
 			&i.Availability,
+			&i.UseInventory,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -472,7 +476,7 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 }
 
 const listProductsByBrandID = `-- name: ListProductsByBrandID :many
-SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, created_at, updated_at FROM products WHERE brand_id = $1 ORDER BY id LIMIT $2 OFFSET $3
+SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, use_inventory, created_at, updated_at FROM products WHERE brand_id = $1 ORDER BY id LIMIT $2 OFFSET $3
 `
 
 type ListProductsByBrandIDParams struct {
@@ -502,6 +506,7 @@ func (q *Queries) ListProductsByBrandID(ctx context.Context, arg ListProductsByB
 			&i.Status,
 			&i.BrandID,
 			&i.Availability,
+			&i.UseInventory,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -519,7 +524,7 @@ func (q *Queries) ListProductsByBrandID(ctx context.Context, arg ListProductsByB
 }
 
 const listProductsByCategoryID = `-- name: ListProductsByCategoryID :many
-SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, created_at, updated_at FROM products WHERE category_id = $1 ORDER BY id LIMIT $2 OFFSET $3
+SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, use_inventory, created_at, updated_at FROM products WHERE category_id = $1 ORDER BY id LIMIT $2 OFFSET $3
 `
 
 type ListProductsByCategoryIDParams struct {
@@ -549,6 +554,7 @@ func (q *Queries) ListProductsByCategoryID(ctx context.Context, arg ListProducts
 			&i.Status,
 			&i.BrandID,
 			&i.Availability,
+			&i.UseInventory,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -566,7 +572,7 @@ func (q *Queries) ListProductsByCategoryID(ctx context.Context, arg ListProducts
 }
 
 const listProductsByVendorID = `-- name: ListProductsByVendorID :many
-SELECT products.id, products.type, products.name, products.category_id, products.slug, products.image, products.details, products.price, products.status, products.brand_id, products.availability, products.created_at, products.updated_at FROM vendors
+SELECT products.id, products.type, products.name, products.category_id, products.slug, products.image, products.details, products.price, products.status, products.brand_id, products.availability, products.use_inventory, products.created_at, products.updated_at FROM vendors
 INNER JOIN brands ON vendors.id = brands.vendor_id
 INNER JOIN products ON brands.id = products.brand_id
 WHERE vendors.id = $1 ORDER BY products.id LIMIT $2 OFFSET $3
@@ -599,6 +605,7 @@ func (q *Queries) ListProductsByVendorID(ctx context.Context, arg ListProductsBy
 			&i.Status,
 			&i.BrandID,
 			&i.Availability,
+			&i.UseInventory,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -616,7 +623,7 @@ func (q *Queries) ListProductsByVendorID(ctx context.Context, arg ListProductsBy
 }
 
 const searchProducts = `-- name: SearchProducts :many
-SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, created_at, updated_at FROM products
+SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, use_inventory, created_at, updated_at FROM products
 WHERE name ILIKE $1 ORDER BY id LIMIT $2 OFFSET $3
 `
 
@@ -647,6 +654,7 @@ func (q *Queries) SearchProducts(ctx context.Context, arg SearchProductsParams) 
 			&i.Status,
 			&i.BrandID,
 			&i.Availability,
+			&i.UseInventory,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -664,7 +672,7 @@ func (q *Queries) SearchProducts(ctx context.Context, arg SearchProductsParams) 
 }
 
 const searchProductsByBrandID = `-- name: SearchProductsByBrandID :many
-SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, created_at, updated_at FROM products
+SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, use_inventory, created_at, updated_at FROM products
 WHERE brand_id = $2 AND name ILIKE $1 ORDER BY id LIMIT $3 OFFSET $4
 `
 
@@ -701,6 +709,7 @@ func (q *Queries) SearchProductsByBrandID(ctx context.Context, arg SearchProduct
 			&i.Status,
 			&i.BrandID,
 			&i.Availability,
+			&i.UseInventory,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -718,7 +727,7 @@ func (q *Queries) SearchProductsByBrandID(ctx context.Context, arg SearchProduct
 }
 
 const searchProductsByCategoryID = `-- name: SearchProductsByCategoryID :many
-SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, created_at, updated_at FROM products
+SELECT id, type, name, category_id, slug, image, details, price, status, brand_id, availability, use_inventory, created_at, updated_at FROM products
 WHERE category_id = $2 AND name ILIKE $1 ORDER BY id LIMIT $3 OFFSET $4
 `
 
@@ -755,6 +764,7 @@ func (q *Queries) SearchProductsByCategoryID(ctx context.Context, arg SearchProd
 			&i.Status,
 			&i.BrandID,
 			&i.Availability,
+			&i.UseInventory,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -784,7 +794,7 @@ UPDATE products SET
   brand_id = $10,
   availability = $11
 WHERE id = $1
-RETURNING id, type, name, category_id, slug, image, details, price, status, brand_id, availability, created_at, updated_at
+RETURNING id, type, name, category_id, slug, image, details, price, status, brand_id, availability, use_inventory, created_at, updated_at
 `
 
 type UpdateProductParams struct {
@@ -828,6 +838,7 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (P
 		&i.Status,
 		&i.BrandID,
 		&i.Availability,
+		&i.UseInventory,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

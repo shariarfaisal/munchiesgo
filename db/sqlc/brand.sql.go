@@ -105,7 +105,7 @@ RETURNING id, brand_id, day_of_week, start_time, end_time, created_at
 `
 
 type CreateOperationTimeParams struct {
-	BrandID   int32     `json:"brand_id"`
+	BrandID   int64     `json:"brand_id"`
 	DayOfWeek int32     `json:"day_of_week"`
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
@@ -304,7 +304,7 @@ SELECT id, brand_id, day_of_week, start_time, end_time, created_at FROM operatio
 `
 
 type ListOperationTimesByBrandIdParams struct {
-	BrandID int32 `json:"brand_id"`
+	BrandID int64 `json:"brand_id"`
 	Limit   int32 `json:"limit"`
 	Offset  int32 `json:"offset"`
 }
@@ -437,7 +437,7 @@ RETURNING id, brand_id, day_of_week, start_time, end_time, created_at
 
 type UpdateOperationTimeParams struct {
 	ID        int64     `json:"id"`
-	BrandID   int32     `json:"brand_id"`
+	BrandID   int64     `json:"brand_id"`
 	DayOfWeek int32     `json:"day_of_week"`
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`

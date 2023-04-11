@@ -35,26 +35,26 @@ func (q *Queries) CountCategoriesByBrandID(ctx context.Context, brandID int64) (
 const createBrandCategory = `-- name: CreateBrandCategory :one
 INSERT INTO brand_categories (
   brand_id,
-  name,
-  image
+  category_id, 
+  name
 ) VALUES ($1, $2, $3)
-RETURNING id, brand_id, name, image, created_at
+RETURNING id, brand_id, category_id, name, created_at
 `
 
 type CreateBrandCategoryParams struct {
-	BrandID int64  `json:"brand_id"`
-	Name    string `json:"name"`
-	Image   string `json:"image"`
+	BrandID    int64  `json:"brand_id"`
+	CategoryID int64  `json:"category_id"`
+	Name       string `json:"name"`
 }
 
 func (q *Queries) CreateBrandCategory(ctx context.Context, arg CreateBrandCategoryParams) (BrandCategory, error) {
-	row := q.queryRow(ctx, q.createBrandCategoryStmt, createBrandCategory, arg.BrandID, arg.Name, arg.Image)
+	row := q.queryRow(ctx, q.createBrandCategoryStmt, createBrandCategory, arg.BrandID, arg.CategoryID, arg.Name)
 	var i BrandCategory
 	err := row.Scan(
 		&i.ID,
 		&i.BrandID,
+		&i.CategoryID,
 		&i.Name,
-		&i.Image,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -109,7 +109,7 @@ func (q *Queries) DeleteCategory(ctx context.Context, id int64) error {
 }
 
 const getBrandCategory = `-- name: GetBrandCategory :one
-SELECT id, brand_id, name, image, created_at FROM brand_categories WHERE brand_id = $1 AND id = $2
+SELECT id, brand_id, category_id, name, created_at FROM brand_categories WHERE brand_id = $1 AND id = $2
 `
 
 type GetBrandCategoryParams struct {
@@ -123,8 +123,8 @@ func (q *Queries) GetBrandCategory(ctx context.Context, arg GetBrandCategoryPara
 	err := row.Scan(
 		&i.ID,
 		&i.BrandID,
+		&i.CategoryID,
 		&i.Name,
-		&i.Image,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -147,7 +147,7 @@ func (q *Queries) GetCategory(ctx context.Context, id int64) (Category, error) {
 }
 
 const listBrandCategories = `-- name: ListBrandCategories :many
-SELECT id, brand_id, name, image, created_at FROM brand_categories WHERE brand_id = $1 ORDER BY id LIMIT $2 OFFSET $3
+SELECT id, brand_id, category_id, name, created_at FROM brand_categories WHERE brand_id = $1 ORDER BY id LIMIT $2 OFFSET $3
 `
 
 type ListBrandCategoriesParams struct {
@@ -168,8 +168,8 @@ func (q *Queries) ListBrandCategories(ctx context.Context, arg ListBrandCategori
 		if err := rows.Scan(
 			&i.ID,
 			&i.BrandID,
+			&i.CategoryID,
 			&i.Name,
-			&i.Image,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -223,7 +223,7 @@ func (q *Queries) ListCategories(ctx context.Context, arg ListCategoriesParams) 
 }
 
 const searchBrandCategories = `-- name: SearchBrandCategories :many
-SELECT id, brand_id, name, image, created_at FROM brand_categories WHERE brand_id = $1 AND name ILIKE '%' || $2 || '%' ORDER BY id LIMIT $3 OFFSET $4
+SELECT id, brand_id, category_id, name, created_at FROM brand_categories WHERE brand_id = $1 AND name ILIKE '%' || $2 || '%' ORDER BY id LIMIT $3 OFFSET $4
 `
 
 type SearchBrandCategoriesParams struct {
@@ -250,8 +250,8 @@ func (q *Queries) SearchBrandCategories(ctx context.Context, arg SearchBrandCate
 		if err := rows.Scan(
 			&i.ID,
 			&i.BrandID,
+			&i.CategoryID,
 			&i.Name,
-			&i.Image,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -307,32 +307,25 @@ func (q *Queries) SearchCategories(ctx context.Context, arg SearchCategoriesPara
 
 const updateBrandCategory = `-- name: UpdateBrandCategory :one
 UPDATE brand_categories SET
-  name = $2,
-  image = $3
-WHERE brand_id = $1 AND id = $4
-RETURNING id, brand_id, name, image, created_at
+  name = $2
+WHERE brand_id = $1 AND id = $3
+RETURNING id, brand_id, category_id, name, created_at
 `
 
 type UpdateBrandCategoryParams struct {
 	BrandID int64  `json:"brand_id"`
 	Name    string `json:"name"`
-	Image   string `json:"image"`
 	ID      int64  `json:"id"`
 }
 
 func (q *Queries) UpdateBrandCategory(ctx context.Context, arg UpdateBrandCategoryParams) (BrandCategory, error) {
-	row := q.queryRow(ctx, q.updateBrandCategoryStmt, updateBrandCategory,
-		arg.BrandID,
-		arg.Name,
-		arg.Image,
-		arg.ID,
-	)
+	row := q.queryRow(ctx, q.updateBrandCategoryStmt, updateBrandCategory, arg.BrandID, arg.Name, arg.ID)
 	var i BrandCategory
 	err := row.Scan(
 		&i.ID,
 		&i.BrandID,
+		&i.CategoryID,
 		&i.Name,
-		&i.Image,
 		&i.CreatedAt,
 	)
 	return i, err

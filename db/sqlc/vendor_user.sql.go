@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"time"
 )
 
@@ -25,13 +24,13 @@ RETURNING id, username, full_name, email, hashed_password, password_changed_at, 
 `
 
 type CreateVendorUserParams struct {
-	Username          sql.NullString `json:"username"`
-	FullName          string         `json:"full_name"`
-	Email             string         `json:"email"`
-	HashedPassword    string         `json:"hashed_password"`
-	PasswordChangedAt time.Time      `json:"password_changed_at"`
-	Role              string         `json:"role"`
-	VendorID          int32          `json:"vendor_id"`
+	Username          string    `json:"username"`
+	FullName          string    `json:"full_name"`
+	Email             string    `json:"email"`
+	HashedPassword    string    `json:"hashed_password"`
+	PasswordChangedAt time.Time `json:"password_changed_at"`
+	Role              string    `json:"role"`
+	VendorID          int64     `json:"vendor_id"`
 }
 
 func (q *Queries) CreateVendorUser(ctx context.Context, arg CreateVendorUserParams) (VendorUser, error) {
@@ -63,7 +62,7 @@ const deleteVendorUser = `-- name: DeleteVendorUser :exec
 DELETE FROM vendor_users WHERE id = $1
 `
 
-func (q *Queries) DeleteVendorUser(ctx context.Context, id int32) error {
+func (q *Queries) DeleteVendorUser(ctx context.Context, id int64) error {
 	_, err := q.exec(ctx, q.deleteVendorUserStmt, deleteVendorUser, id)
 	return err
 }
@@ -72,7 +71,7 @@ const getVendorUser = `-- name: GetVendorUser :one
 SELECT id, username, full_name, email, hashed_password, password_changed_at, role, vendor_id, created_at FROM vendor_users WHERE id = $1
 `
 
-func (q *Queries) GetVendorUser(ctx context.Context, id int32) (VendorUser, error) {
+func (q *Queries) GetVendorUser(ctx context.Context, id int64) (VendorUser, error) {
 	row := q.queryRow(ctx, q.getVendorUserStmt, getVendorUser, id)
 	var i VendorUser
 	err := row.Scan(
@@ -94,7 +93,7 @@ SELECT id, username, full_name, email, hashed_password, password_changed_at, rol
 `
 
 type ListVendorUsersParams struct {
-	VendorID int32 `json:"vendor_id"`
+	VendorID int64 `json:"vendor_id"`
 	Limit    int32 `json:"limit"`
 	Offset   int32 `json:"offset"`
 }
@@ -146,14 +145,14 @@ RETURNING id, username, full_name, email, hashed_password, password_changed_at, 
 `
 
 type UpdateVendorUserParams struct {
-	ID                int32          `json:"id"`
-	Username          sql.NullString `json:"username"`
-	FullName          string         `json:"full_name"`
-	Email             string         `json:"email"`
-	HashedPassword    string         `json:"hashed_password"`
-	PasswordChangedAt time.Time      `json:"password_changed_at"`
-	Role              string         `json:"role"`
-	VendorID          int32          `json:"vendor_id"`
+	ID                int64     `json:"id"`
+	Username          string    `json:"username"`
+	FullName          string    `json:"full_name"`
+	Email             string    `json:"email"`
+	HashedPassword    string    `json:"hashed_password"`
+	PasswordChangedAt time.Time `json:"password_changed_at"`
+	Role              string    `json:"role"`
+	VendorID          int64     `json:"vendor_id"`
 }
 
 func (q *Queries) UpdateVendorUser(ctx context.Context, arg UpdateVendorUserParams) (VendorUser, error) {

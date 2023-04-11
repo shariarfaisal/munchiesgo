@@ -23,7 +23,7 @@ type Querier interface {
 	CountProductsByVendorID(ctx context.Context, id int64) (int64, error)
 	CountVendors(ctx context.Context) (int64, error)
 	CountZones(ctx context.Context) (int64, error)
-	CountZonesByBrandID(ctx context.Context, brandID int32) (int64, error)
+	CountZonesByBrandID(ctx context.Context, brandID int64) (int64, error)
 	CreateBrand(ctx context.Context, arg CreateBrandParams) (Brand, error)
 	CreateBrandCategory(ctx context.Context, arg CreateBrandCategoryParams) (BrandCategory, error)
 	CreateBrandZone(ctx context.Context, arg CreateBrandZoneParams) (BrandZone, error)
@@ -60,7 +60,7 @@ type Querier interface {
 	DeleteProductVariant(ctx context.Context, id int64) error
 	DeleteProductVariantItem(ctx context.Context, id int64) error
 	DeleteVendor(ctx context.Context, id int64) error
-	DeleteVendorUser(ctx context.Context, id int32) error
+	DeleteVendorUser(ctx context.Context, id int64) error
 	DeleteZone(ctx context.Context, id int32) error
 	GetBrand(ctx context.Context, id int64) (Brand, error)
 	GetBrandCategory(ctx context.Context, arg GetBrandCategoryParams) (BrandCategory, error)
@@ -76,7 +76,7 @@ type Querier interface {
 	GetProductVariantItem(ctx context.Context, id int64) (ProductVariantItem, error)
 	GetProductWithVariants(ctx context.Context, id int64) (GetProductWithVariantsRow, error)
 	GetVendor(ctx context.Context, id int64) (Vendor, error)
-	GetVendorUser(ctx context.Context, id int32) (VendorUser, error)
+	GetVendorUser(ctx context.Context, id int64) (VendorUser, error)
 	GetZone(ctx context.Context, id int32) (Zone, error)
 	ListBrandCategories(ctx context.Context, arg ListBrandCategoriesParams) ([]BrandCategory, error)
 	ListBrandZones(ctx context.Context, arg ListBrandZonesParams) ([]BrandZone, error)
