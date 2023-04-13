@@ -170,7 +170,7 @@ func (q *Queries) UpdateVendorUser(ctx context.Context, arg UpdateVendorUserPara
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
-		&i.FullName,
+		&i.FullName, 
 		&i.Email,
 		&i.HashedPassword,
 		&i.PasswordChangedAt,
