@@ -7,6 +7,7 @@ import (
 	"github.com/Munchies-Engineering/backend/api"
 	db "github.com/Munchies-Engineering/backend/db/sqlc"
 	"github.com/Munchies-Engineering/backend/util"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -23,7 +24,9 @@ func main() {
 	defer conn.Close()
 
 	store := db.NewStore(conn)
-	server := api.NewServer(config, store)
-
+	server, err := api.NewServer(config, store)
+	if err != nil {
+		log.Fatal(err)
+	}
 	server.Start(config.ServerAddress)
 }

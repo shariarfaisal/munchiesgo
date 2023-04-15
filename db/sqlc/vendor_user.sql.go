@@ -88,6 +88,27 @@ func (q *Queries) GetVendorUser(ctx context.Context, id int64) (VendorUser, erro
 	return i, err
 }
 
+const getVendorUserByUsername = `-- name: GetVendorUserByUsername :one
+SELECT id, username, full_name, email, hashed_password, password_changed_at, role, vendor_id, created_at FROM vendor_users WHERE username = $1
+`
+
+func (q *Queries) GetVendorUserByUsername(ctx context.Context, username string) (VendorUser, error) {
+	row := q.queryRow(ctx, q.getVendorUserByUsernameStmt, getVendorUserByUsername, username)
+	var i VendorUser
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.FullName,
+		&i.Email,
+		&i.HashedPassword,
+		&i.PasswordChangedAt,
+		&i.Role,
+		&i.VendorID,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const listVendorUsers = `-- name: ListVendorUsers :many
 SELECT id, username, full_name, email, hashed_password, password_changed_at, role, vendor_id, created_at FROM vendor_users WHERE vendor_id = $1 ORDER BY id LIMIT $2 OFFSET $3
 `
@@ -170,7 +191,7 @@ func (q *Queries) UpdateVendorUser(ctx context.Context, arg UpdateVendorUserPara
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
-		&i.FullName, 
+		&i.FullName,
 		&i.Email,
 		&i.HashedPassword,
 		&i.PasswordChangedAt,

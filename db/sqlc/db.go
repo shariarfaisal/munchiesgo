@@ -192,6 +192,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getVendorUserStmt, err = db.PrepareContext(ctx, getVendorUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetVendorUser: %w", err)
 	}
+	if q.getVendorUserByUsernameStmt, err = db.PrepareContext(ctx, getVendorUserByUsername); err != nil {
+		return nil, fmt.Errorf("error preparing query GetVendorUserByUsername: %w", err)
+	}
 	if q.getZoneStmt, err = db.PrepareContext(ctx, getZone); err != nil {
 		return nil, fmt.Errorf("error preparing query GetZone: %w", err)
 	}
@@ -609,6 +612,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getVendorUserStmt: %w", cerr)
 		}
 	}
+	if q.getVendorUserByUsernameStmt != nil {
+		if cerr := q.getVendorUserByUsernameStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getVendorUserByUsernameStmt: %w", cerr)
+		}
+	}
 	if q.getZoneStmt != nil {
 		if cerr := q.getZoneStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getZoneStmt: %w", cerr)
@@ -924,6 +932,7 @@ type Queries struct {
 	getProductWithVariantsStmt            *sql.Stmt
 	getVendorStmt                         *sql.Stmt
 	getVendorUserStmt                     *sql.Stmt
+	getVendorUserByUsernameStmt           *sql.Stmt
 	getZoneStmt                           *sql.Stmt
 	listBrandCategoriesStmt               *sql.Stmt
 	listBrandZonesStmt                    *sql.Stmt
@@ -1030,6 +1039,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getProductWithVariantsStmt:            q.getProductWithVariantsStmt,
 		getVendorStmt:                         q.getVendorStmt,
 		getVendorUserStmt:                     q.getVendorUserStmt,
+		getVendorUserByUsernameStmt:           q.getVendorUserByUsernameStmt,
 		getZoneStmt:                           q.getZoneStmt,
 		listBrandCategoriesStmt:               q.listBrandCategoriesStmt,
 		listBrandZonesStmt:                    q.listBrandZonesStmt,

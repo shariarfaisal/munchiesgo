@@ -69,3 +69,26 @@ func randomVendor(t *testing.T) Vendor {
 
 	return vendor
 }
+
+func TestGetVendor(t *testing.T) {
+	vendor := randomVendor(t)
+
+	res, err := testQueries.GetVendor(context.Background(), vendor.ID)
+	require.NoError(t, err)
+	require.NotEmpty(t, res)
+
+	require.Equal(t, vendor.ID, res.ID)
+	require.Equal(t, vendor.Name, res.Name)
+	require.Equal(t, vendor.Email, res.Email)
+	require.Equal(t, vendor.Phone, res.Phone)
+
+	var paymentsInfo map[string]interface{}
+	err = json.Unmarshal(res.PaymentInfo, &paymentsInfo)
+	require.NoError(t, err)
+	require.NotEmpty(t, paymentsInfo["account_number"])
+
+	var socialLinks map[string]interface{}
+	err = json.Unmarshal(res.SocialLinks, &socialLinks)
+	require.NoError(t, err)
+	require.NotEmpty(t, socialLinks["facebook"])
+}

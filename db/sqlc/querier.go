@@ -77,6 +77,7 @@ type Querier interface {
 	GetProductWithVariants(ctx context.Context, id int64) (GetProductWithVariantsRow, error)
 	GetVendor(ctx context.Context, id int64) (Vendor, error)
 	GetVendorUser(ctx context.Context, id int64) (VendorUser, error)
+	GetVendorUserByUsername(ctx context.Context, username string) (VendorUser, error)
 	GetZone(ctx context.Context, id int32) (Zone, error)
 	ListBrandCategories(ctx context.Context, arg ListBrandCategoriesParams) ([]BrandCategory, error)
 	ListBrandZones(ctx context.Context, arg ListBrandZonesParams) ([]BrandZone, error)

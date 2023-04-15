@@ -2,25 +2,34 @@ package api
 
 import (
 	db "github.com/Munchies-Engineering/backend/db/sqlc"
+	"github.com/Munchies-Engineering/backend/token"
 	"github.com/Munchies-Engineering/backend/util"
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	config util.Config
-	store  db.Store
-	router *gin.Engine
+	config     util.Config
+	store      db.Store
+	router     *gin.Engine
+	tokenMaker token.Maker
 }
 
-func NewServer(config util.Config, store db.Store) *Server {
+func NewServer(config util.Config, store db.Store) (*Server, error) {
+
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, err
+	}
+
 	server := &Server{
-		config: config,
-		store:  store,
+		config:     config,
+		store:      store,
+		tokenMaker: tokenMaker,
 	}
 
 	server.routerSetup()
 
-	return server
+	return server, nil
 }
 
 func (server *Server) Start(address string) error {
@@ -31,10 +40,10 @@ func (server *Server) routerSetup() {
 	router := gin.Default()
 
 	// vendor routes
-	vendor := router.Group("/api/vendor")
+	vendor := router.Group("/api/vendor", authMiddleware(server.tokenMaker))
 	{
 		vendor.POST("/", server.createVendor)
-		vendor.GET("/", server.searchVendors)
+		vendor.GET("/", server.listVendors)
 		vendor.GET("/search", server.searchVendors)
 		vendor.GET("/:id", server.getVendor)
 		vendor.DELETE("/:id", server.deleteVendor)
@@ -42,9 +51,9 @@ func (server *Server) routerSetup() {
 	}
 
 	// vendor user routes
-	vendorUser := router.Group("/api/vendor_user")
+	router.POST("/api/vendor_user/login", server.loginVendorUser)
+	vendorUser := router.Group("/api/vendor_user", authMiddleware(server.tokenMaker))
 	{
-		vendorUser.POST("/login", server.loginVendorUser)
 		vendorUser.POST("/", server.createVendorUser)
 		vendorUser.GET("/", server.listVendorUsers)
 		vendorUser.GET("/:id", server.getVendorUser)

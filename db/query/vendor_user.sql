@@ -29,6 +29,9 @@ DELETE FROM vendor_users WHERE id = $1;
 -- name: GetVendorUser :one
 SELECT * FROM vendor_users WHERE id = $1;
 
+-- name: GetVendorUserByUsername :one
+SELECT * FROM vendor_users WHERE username = $1;
+
 -- name: ListVendorUsers :many
 SELECT * FROM vendor_users WHERE vendor_id = $1 ORDER BY id LIMIT $2 OFFSET $3;
 
