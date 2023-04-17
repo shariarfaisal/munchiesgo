@@ -61,6 +61,21 @@ func (server *Server) routerSetup() {
 		vendorUser.PUT("/:id", server.updateVendorUser)
 	}
 
+	// brand routes
+	brandGroup := router.Group("/api/brand", authMiddleware(server.tokenMaker))
+	{
+		brandGroup.POST("/", server.createBrand)
+		brandGroup.GET("/", server.listBrands)
+		brandGroup.GET("/:id", server.getBrand)
+		brandGroup.PUT("/:id", server.updateBrand)
+		brandGroup.DELETE("/:id", server.deleteBrand)
+		// brand operation times
+		brandGroup.GET("/:id/operation_time", server.getOperationTimes)
+		brandGroup.POST("/:id/operation_time", server.addOperationTime)
+		brandGroup.PUT("/operation_time/:id", server.updateOperationTime)
+		brandGroup.DELETE("/operation_time/:id", server.deleteOperationTime)
+	}
+
 	server.router = router
 }
 

@@ -27,8 +27,8 @@ func NewPasetoMaker(symmetricKey string) (Maker, error) {
 	return maker, nil
 }
 
-func (maker *PasetoMaker) CreateToken(userID int64, duration time.Duration) (string, error) {
-	payload := NewPayload(userID, duration)
+func (maker *PasetoMaker) CreateToken(userID int64, vendorID int64, role string, duration time.Duration) (string, error) {
+	payload := NewPayload(userID, vendorID, role, duration)
 	token, err := maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
 	if err != nil {
 		return "", err

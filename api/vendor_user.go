@@ -48,6 +48,15 @@ func vendorUserResponse(user db.VendorUser) *vendorUserResponseType {
 	}
 }
 
+func (server *Server) getVendorUserByID(ctx *gin.Context, userId int64) (db.VendorUser, error) {
+	user, err := server.store.GetVendorUser(ctx, userId)
+	if err != nil {
+		return db.VendorUser{}, err
+	}
+
+	return user, nil
+}
+
 func (server *Server) createVendorUser(ctx *gin.Context) {
 	var req createVendorUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -56,7 +65,7 @@ func (server *Server) createVendorUser(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(authorizationPayload).(*token.Payload)
-	user, err := server.store.GetVendorUser(ctx, authPayload.UserID)
+	user, err := server.getVendorUserByID(ctx, authPayload.UserID)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
@@ -118,7 +127,7 @@ func (server *Server) loginVendorUser(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, err := server.tokenMaker.CreateToken(user.ID, server.config.TokenDuration)
+	accessToken, err := server.tokenMaker.CreateToken(user.ID, user.VendorID, user.Role, server.config.TokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -131,17 +140,17 @@ func (server *Server) loginVendorUser(ctx *gin.Context) {
 }
 
 func (server *Server) updateVendorUser(ctx *gin.Context) {
-
+	// TODO: Implement
 }
 
 func (server *Server) getVendorUser(ctx *gin.Context) {
-
+	// TODO: Implement
 }
 
 func (server *Server) listVendorUsers(ctx *gin.Context) {
-
+	// TODO: Implement
 }
 
 func (server *Server) deleteVendorUser(ctx *gin.Context) {
-
+	// TODO: Implement
 }

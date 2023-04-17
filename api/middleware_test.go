@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func addAuthorization(t *testing.T, request *http.Request, tokenMaker token.Maker, authorizationType string, userId int64, duration time.Duration) {
-	token, err := tokenMaker.CreateToken(userId, duration)
+func addAuthorization(t *testing.T, request *http.Request, tokenMaker token.Maker, authorizationType string, userId int64, vendorId int64, role string, duration time.Duration) {
+	token, err := tokenMaker.CreateToken(userId, vendorId, role, duration)
 	require.NoError(t, err)
 	fmt.Println(token)
 
@@ -31,7 +31,7 @@ func TestAuthMiddleware(t *testing.T) {
 		{
 			name: "OK",
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, 1, time.Minute)
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, 1, 1, "admin", time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -40,7 +40,7 @@ func TestAuthMiddleware(t *testing.T) {
 		{
 			name: "Invalid Authorization Type",
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, "xyz", 1, time.Minute)
+				addAuthorization(t, request, tokenMaker, "xyz", 1, 1, "admin", time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, recorder.Code)
@@ -49,7 +49,7 @@ func TestAuthMiddleware(t *testing.T) {
 		{
 			name: "Expired Token",
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, "xyz", 1, -time.Minute)
+				addAuthorization(t, request, tokenMaker, "xyz", 1, 1, "admin", -time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, recorder.Code)
