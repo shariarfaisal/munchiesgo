@@ -183,9 +183,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getProductVariantItemStmt, err = db.PrepareContext(ctx, getProductVariantItem); err != nil {
 		return nil, fmt.Errorf("error preparing query GetProductVariantItem: %w", err)
 	}
-	if q.getProductWithVariantsStmt, err = db.PrepareContext(ctx, getProductWithVariants); err != nil {
-		return nil, fmt.Errorf("error preparing query GetProductWithVariants: %w", err)
-	}
 	if q.getVendorStmt, err = db.PrepareContext(ctx, getVendor); err != nil {
 		return nil, fmt.Errorf("error preparing query GetVendor: %w", err)
 	}
@@ -200,6 +197,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.listBrandCategoriesStmt, err = db.PrepareContext(ctx, listBrandCategories); err != nil {
 		return nil, fmt.Errorf("error preparing query ListBrandCategories: %w", err)
+	}
+	if q.listBrandIdsByVendorIDStmt, err = db.PrepareContext(ctx, listBrandIdsByVendorID); err != nil {
+		return nil, fmt.Errorf("error preparing query ListBrandIdsByVendorID: %w", err)
 	}
 	if q.listBrandZonesStmt, err = db.PrepareContext(ctx, listBrandZones); err != nil {
 		return nil, fmt.Errorf("error preparing query ListBrandZones: %w", err)
@@ -239,6 +239,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.listProductsByVendorIDStmt, err = db.PrepareContext(ctx, listProductsByVendorID); err != nil {
 		return nil, fmt.Errorf("error preparing query ListProductsByVendorID: %w", err)
+	}
+	if q.listVariantItemsWithProductDetailsStmt, err = db.PrepareContext(ctx, listVariantItemsWithProductDetails); err != nil {
+		return nil, fmt.Errorf("error preparing query ListVariantItemsWithProductDetails: %w", err)
 	}
 	if q.listVendorUsersStmt, err = db.PrepareContext(ctx, listVendorUsers); err != nil {
 		return nil, fmt.Errorf("error preparing query ListVendorUsers: %w", err)
@@ -597,11 +600,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getProductVariantItemStmt: %w", cerr)
 		}
 	}
-	if q.getProductWithVariantsStmt != nil {
-		if cerr := q.getProductWithVariantsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getProductWithVariantsStmt: %w", cerr)
-		}
-	}
 	if q.getVendorStmt != nil {
 		if cerr := q.getVendorStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getVendorStmt: %w", cerr)
@@ -625,6 +623,11 @@ func (q *Queries) Close() error {
 	if q.listBrandCategoriesStmt != nil {
 		if cerr := q.listBrandCategoriesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing listBrandCategoriesStmt: %w", cerr)
+		}
+	}
+	if q.listBrandIdsByVendorIDStmt != nil {
+		if cerr := q.listBrandIdsByVendorIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listBrandIdsByVendorIDStmt: %w", cerr)
 		}
 	}
 	if q.listBrandZonesStmt != nil {
@@ -690,6 +693,11 @@ func (q *Queries) Close() error {
 	if q.listProductsByVendorIDStmt != nil {
 		if cerr := q.listProductsByVendorIDStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing listProductsByVendorIDStmt: %w", cerr)
+		}
+	}
+	if q.listVariantItemsWithProductDetailsStmt != nil {
+		if cerr := q.listVariantItemsWithProductDetailsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listVariantItemsWithProductDetailsStmt: %w", cerr)
 		}
 	}
 	if q.listVendorUsersStmt != nil {
@@ -874,215 +882,217 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                                    DBTX
-	tx                                    *sql.Tx
-	countCategoriesStmt                   *sql.Stmt
-	countCategoriesByBrandIDStmt          *sql.Stmt
-	countInventoryHistoryStmt             *sql.Stmt
-	countInventoryHistoryByProductIdStmt  *sql.Stmt
-	countProductInventoryStmt             *sql.Stmt
-	countProductInventoryByProductIdStmt  *sql.Stmt
-	countProductVariantItemsStmt          *sql.Stmt
-	countProductVariantsStmt              *sql.Stmt
-	countProductsStmt                     *sql.Stmt
-	countProductsByBrandIDStmt            *sql.Stmt
-	countProductsByCategoryIDStmt         *sql.Stmt
-	countProductsByVendorIDStmt           *sql.Stmt
-	countVendorsStmt                      *sql.Stmt
-	countZonesStmt                        *sql.Stmt
-	countZonesByBrandIDStmt               *sql.Stmt
-	createBrandStmt                       *sql.Stmt
-	createBrandCategoryStmt               *sql.Stmt
-	createBrandZoneStmt                   *sql.Stmt
-	createCategoryStmt                    *sql.Stmt
-	createInventoryHistoryStmt            *sql.Stmt
-	createOperationTimeStmt               *sql.Stmt
-	createProductStmt                     *sql.Stmt
-	createProductInventoryStmt            *sql.Stmt
-	createProductVariantStmt              *sql.Stmt
-	createProductVariantItemStmt          *sql.Stmt
-	createVendorStmt                      *sql.Stmt
-	createVendorUserStmt                  *sql.Stmt
-	createZoneStmt                        *sql.Stmt
-	deleteBrandStmt                       *sql.Stmt
-	deleteBrandCategoryStmt               *sql.Stmt
-	deleteBrandZoneStmt                   *sql.Stmt
-	deleteCategoryStmt                    *sql.Stmt
-	deleteInventoryHistoryStmt            *sql.Stmt
-	deleteOperationTimeStmt               *sql.Stmt
-	deleteProductStmt                     *sql.Stmt
-	deleteProductInventoryStmt            *sql.Stmt
-	deleteProductVariantStmt              *sql.Stmt
-	deleteProductVariantItemStmt          *sql.Stmt
-	deleteVendorStmt                      *sql.Stmt
-	deleteVendorUserStmt                  *sql.Stmt
-	deleteZoneStmt                        *sql.Stmt
-	getBrandStmt                          *sql.Stmt
-	getBrandCategoryStmt                  *sql.Stmt
-	getCategoryStmt                       *sql.Stmt
-	getInventoryHistoryStmt               *sql.Stmt
-	getInventoryHistoryByProductIDStmt    *sql.Stmt
-	getOperationTimeStmt                  *sql.Stmt
-	getProductStmt                        *sql.Stmt
-	getProductBySlugStmt                  *sql.Stmt
-	getProductInventoryStmt               *sql.Stmt
-	getProductInventoryByProductIDStmt    *sql.Stmt
-	getProductVariantStmt                 *sql.Stmt
-	getProductVariantItemStmt             *sql.Stmt
-	getProductWithVariantsStmt            *sql.Stmt
-	getVendorStmt                         *sql.Stmt
-	getVendorUserStmt                     *sql.Stmt
-	getVendorUserByUsernameStmt           *sql.Stmt
-	getZoneStmt                           *sql.Stmt
-	listBrandCategoriesStmt               *sql.Stmt
-	listBrandZonesStmt                    *sql.Stmt
-	listBrandsStmt                        *sql.Stmt
-	listBrandsByVendorIDStmt              *sql.Stmt
-	listCategoriesStmt                    *sql.Stmt
-	listInventoryHistoryStmt              *sql.Stmt
-	listOperationTimesByBrandIdStmt       *sql.Stmt
-	listProductInventoryStmt              *sql.Stmt
-	listProductVariantItemsStmt           *sql.Stmt
-	listProductVariantsStmt               *sql.Stmt
-	listProductsStmt                      *sql.Stmt
-	listProductsByBrandIDStmt             *sql.Stmt
-	listProductsByCategoryIDStmt          *sql.Stmt
-	listProductsByVendorIDStmt            *sql.Stmt
-	listVendorUsersStmt                   *sql.Stmt
-	listVendorsStmt                       *sql.Stmt
-	listZonesStmt                         *sql.Stmt
-	listZonesByBrandIDStmt                *sql.Stmt
-	searchBrandCategoriesStmt             *sql.Stmt
-	searchCategoriesStmt                  *sql.Stmt
-	searchInventoryHistoryStmt            *sql.Stmt
-	searchProductInventoryStmt            *sql.Stmt
-	searchProductsStmt                    *sql.Stmt
-	searchProductsByBrandIDStmt           *sql.Stmt
-	searchProductsByCategoryIDStmt        *sql.Stmt
-	searchVendorsStmt                     *sql.Stmt
-	searchZonesStmt                       *sql.Stmt
-	searchZonesByBrandIDStmt              *sql.Stmt
-	searchZonesByGeoPointStmt             *sql.Stmt
-	searchZonesByGeoPointAndBrandIDStmt   *sql.Stmt
-	searchZonesByGeoPolygonStmt           *sql.Stmt
-	searchZonesByGeoPolygonAndBrandIDStmt *sql.Stmt
-	updateBrandStmt                       *sql.Stmt
-	updateBrandCategoryStmt               *sql.Stmt
-	updateCategoryStmt                    *sql.Stmt
-	updateInventoryHistoryStmt            *sql.Stmt
-	updateOperationTimeStmt               *sql.Stmt
-	updateProductStmt                     *sql.Stmt
-	updateProductInventoryStmt            *sql.Stmt
-	updateProductVariantStmt              *sql.Stmt
-	updateVendorStmt                      *sql.Stmt
-	updateVendorUserStmt                  *sql.Stmt
-	updateZoneStmt                        *sql.Stmt
+	db                                     DBTX
+	tx                                     *sql.Tx
+	countCategoriesStmt                    *sql.Stmt
+	countCategoriesByBrandIDStmt           *sql.Stmt
+	countInventoryHistoryStmt              *sql.Stmt
+	countInventoryHistoryByProductIdStmt   *sql.Stmt
+	countProductInventoryStmt              *sql.Stmt
+	countProductInventoryByProductIdStmt   *sql.Stmt
+	countProductVariantItemsStmt           *sql.Stmt
+	countProductVariantsStmt               *sql.Stmt
+	countProductsStmt                      *sql.Stmt
+	countProductsByBrandIDStmt             *sql.Stmt
+	countProductsByCategoryIDStmt          *sql.Stmt
+	countProductsByVendorIDStmt            *sql.Stmt
+	countVendorsStmt                       *sql.Stmt
+	countZonesStmt                         *sql.Stmt
+	countZonesByBrandIDStmt                *sql.Stmt
+	createBrandStmt                        *sql.Stmt
+	createBrandCategoryStmt                *sql.Stmt
+	createBrandZoneStmt                    *sql.Stmt
+	createCategoryStmt                     *sql.Stmt
+	createInventoryHistoryStmt             *sql.Stmt
+	createOperationTimeStmt                *sql.Stmt
+	createProductStmt                      *sql.Stmt
+	createProductInventoryStmt             *sql.Stmt
+	createProductVariantStmt               *sql.Stmt
+	createProductVariantItemStmt           *sql.Stmt
+	createVendorStmt                       *sql.Stmt
+	createVendorUserStmt                   *sql.Stmt
+	createZoneStmt                         *sql.Stmt
+	deleteBrandStmt                        *sql.Stmt
+	deleteBrandCategoryStmt                *sql.Stmt
+	deleteBrandZoneStmt                    *sql.Stmt
+	deleteCategoryStmt                     *sql.Stmt
+	deleteInventoryHistoryStmt             *sql.Stmt
+	deleteOperationTimeStmt                *sql.Stmt
+	deleteProductStmt                      *sql.Stmt
+	deleteProductInventoryStmt             *sql.Stmt
+	deleteProductVariantStmt               *sql.Stmt
+	deleteProductVariantItemStmt           *sql.Stmt
+	deleteVendorStmt                       *sql.Stmt
+	deleteVendorUserStmt                   *sql.Stmt
+	deleteZoneStmt                         *sql.Stmt
+	getBrandStmt                           *sql.Stmt
+	getBrandCategoryStmt                   *sql.Stmt
+	getCategoryStmt                        *sql.Stmt
+	getInventoryHistoryStmt                *sql.Stmt
+	getInventoryHistoryByProductIDStmt     *sql.Stmt
+	getOperationTimeStmt                   *sql.Stmt
+	getProductStmt                         *sql.Stmt
+	getProductBySlugStmt                   *sql.Stmt
+	getProductInventoryStmt                *sql.Stmt
+	getProductInventoryByProductIDStmt     *sql.Stmt
+	getProductVariantStmt                  *sql.Stmt
+	getProductVariantItemStmt              *sql.Stmt
+	getVendorStmt                          *sql.Stmt
+	getVendorUserStmt                      *sql.Stmt
+	getVendorUserByUsernameStmt            *sql.Stmt
+	getZoneStmt                            *sql.Stmt
+	listBrandCategoriesStmt                *sql.Stmt
+	listBrandIdsByVendorIDStmt             *sql.Stmt
+	listBrandZonesStmt                     *sql.Stmt
+	listBrandsStmt                         *sql.Stmt
+	listBrandsByVendorIDStmt               *sql.Stmt
+	listCategoriesStmt                     *sql.Stmt
+	listInventoryHistoryStmt               *sql.Stmt
+	listOperationTimesByBrandIdStmt        *sql.Stmt
+	listProductInventoryStmt               *sql.Stmt
+	listProductVariantItemsStmt            *sql.Stmt
+	listProductVariantsStmt                *sql.Stmt
+	listProductsStmt                       *sql.Stmt
+	listProductsByBrandIDStmt              *sql.Stmt
+	listProductsByCategoryIDStmt           *sql.Stmt
+	listProductsByVendorIDStmt             *sql.Stmt
+	listVariantItemsWithProductDetailsStmt *sql.Stmt
+	listVendorUsersStmt                    *sql.Stmt
+	listVendorsStmt                        *sql.Stmt
+	listZonesStmt                          *sql.Stmt
+	listZonesByBrandIDStmt                 *sql.Stmt
+	searchBrandCategoriesStmt              *sql.Stmt
+	searchCategoriesStmt                   *sql.Stmt
+	searchInventoryHistoryStmt             *sql.Stmt
+	searchProductInventoryStmt             *sql.Stmt
+	searchProductsStmt                     *sql.Stmt
+	searchProductsByBrandIDStmt            *sql.Stmt
+	searchProductsByCategoryIDStmt         *sql.Stmt
+	searchVendorsStmt                      *sql.Stmt
+	searchZonesStmt                        *sql.Stmt
+	searchZonesByBrandIDStmt               *sql.Stmt
+	searchZonesByGeoPointStmt              *sql.Stmt
+	searchZonesByGeoPointAndBrandIDStmt    *sql.Stmt
+	searchZonesByGeoPolygonStmt            *sql.Stmt
+	searchZonesByGeoPolygonAndBrandIDStmt  *sql.Stmt
+	updateBrandStmt                        *sql.Stmt
+	updateBrandCategoryStmt                *sql.Stmt
+	updateCategoryStmt                     *sql.Stmt
+	updateInventoryHistoryStmt             *sql.Stmt
+	updateOperationTimeStmt                *sql.Stmt
+	updateProductStmt                      *sql.Stmt
+	updateProductInventoryStmt             *sql.Stmt
+	updateProductVariantStmt               *sql.Stmt
+	updateVendorStmt                       *sql.Stmt
+	updateVendorUserStmt                   *sql.Stmt
+	updateZoneStmt                         *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                                    tx,
-		tx:                                    tx,
-		countCategoriesStmt:                   q.countCategoriesStmt,
-		countCategoriesByBrandIDStmt:          q.countCategoriesByBrandIDStmt,
-		countInventoryHistoryStmt:             q.countInventoryHistoryStmt,
-		countInventoryHistoryByProductIdStmt:  q.countInventoryHistoryByProductIdStmt,
-		countProductInventoryStmt:             q.countProductInventoryStmt,
-		countProductInventoryByProductIdStmt:  q.countProductInventoryByProductIdStmt,
-		countProductVariantItemsStmt:          q.countProductVariantItemsStmt,
-		countProductVariantsStmt:              q.countProductVariantsStmt,
-		countProductsStmt:                     q.countProductsStmt,
-		countProductsByBrandIDStmt:            q.countProductsByBrandIDStmt,
-		countProductsByCategoryIDStmt:         q.countProductsByCategoryIDStmt,
-		countProductsByVendorIDStmt:           q.countProductsByVendorIDStmt,
-		countVendorsStmt:                      q.countVendorsStmt,
-		countZonesStmt:                        q.countZonesStmt,
-		countZonesByBrandIDStmt:               q.countZonesByBrandIDStmt,
-		createBrandStmt:                       q.createBrandStmt,
-		createBrandCategoryStmt:               q.createBrandCategoryStmt,
-		createBrandZoneStmt:                   q.createBrandZoneStmt,
-		createCategoryStmt:                    q.createCategoryStmt,
-		createInventoryHistoryStmt:            q.createInventoryHistoryStmt,
-		createOperationTimeStmt:               q.createOperationTimeStmt,
-		createProductStmt:                     q.createProductStmt,
-		createProductInventoryStmt:            q.createProductInventoryStmt,
-		createProductVariantStmt:              q.createProductVariantStmt,
-		createProductVariantItemStmt:          q.createProductVariantItemStmt,
-		createVendorStmt:                      q.createVendorStmt,
-		createVendorUserStmt:                  q.createVendorUserStmt,
-		createZoneStmt:                        q.createZoneStmt,
-		deleteBrandStmt:                       q.deleteBrandStmt,
-		deleteBrandCategoryStmt:               q.deleteBrandCategoryStmt,
-		deleteBrandZoneStmt:                   q.deleteBrandZoneStmt,
-		deleteCategoryStmt:                    q.deleteCategoryStmt,
-		deleteInventoryHistoryStmt:            q.deleteInventoryHistoryStmt,
-		deleteOperationTimeStmt:               q.deleteOperationTimeStmt,
-		deleteProductStmt:                     q.deleteProductStmt,
-		deleteProductInventoryStmt:            q.deleteProductInventoryStmt,
-		deleteProductVariantStmt:              q.deleteProductVariantStmt,
-		deleteProductVariantItemStmt:          q.deleteProductVariantItemStmt,
-		deleteVendorStmt:                      q.deleteVendorStmt,
-		deleteVendorUserStmt:                  q.deleteVendorUserStmt,
-		deleteZoneStmt:                        q.deleteZoneStmt,
-		getBrandStmt:                          q.getBrandStmt,
-		getBrandCategoryStmt:                  q.getBrandCategoryStmt,
-		getCategoryStmt:                       q.getCategoryStmt,
-		getInventoryHistoryStmt:               q.getInventoryHistoryStmt,
-		getInventoryHistoryByProductIDStmt:    q.getInventoryHistoryByProductIDStmt,
-		getOperationTimeStmt:                  q.getOperationTimeStmt,
-		getProductStmt:                        q.getProductStmt,
-		getProductBySlugStmt:                  q.getProductBySlugStmt,
-		getProductInventoryStmt:               q.getProductInventoryStmt,
-		getProductInventoryByProductIDStmt:    q.getProductInventoryByProductIDStmt,
-		getProductVariantStmt:                 q.getProductVariantStmt,
-		getProductVariantItemStmt:             q.getProductVariantItemStmt,
-		getProductWithVariantsStmt:            q.getProductWithVariantsStmt,
-		getVendorStmt:                         q.getVendorStmt,
-		getVendorUserStmt:                     q.getVendorUserStmt,
-		getVendorUserByUsernameStmt:           q.getVendorUserByUsernameStmt,
-		getZoneStmt:                           q.getZoneStmt,
-		listBrandCategoriesStmt:               q.listBrandCategoriesStmt,
-		listBrandZonesStmt:                    q.listBrandZonesStmt,
-		listBrandsStmt:                        q.listBrandsStmt,
-		listBrandsByVendorIDStmt:              q.listBrandsByVendorIDStmt,
-		listCategoriesStmt:                    q.listCategoriesStmt,
-		listInventoryHistoryStmt:              q.listInventoryHistoryStmt,
-		listOperationTimesByBrandIdStmt:       q.listOperationTimesByBrandIdStmt,
-		listProductInventoryStmt:              q.listProductInventoryStmt,
-		listProductVariantItemsStmt:           q.listProductVariantItemsStmt,
-		listProductVariantsStmt:               q.listProductVariantsStmt,
-		listProductsStmt:                      q.listProductsStmt,
-		listProductsByBrandIDStmt:             q.listProductsByBrandIDStmt,
-		listProductsByCategoryIDStmt:          q.listProductsByCategoryIDStmt,
-		listProductsByVendorIDStmt:            q.listProductsByVendorIDStmt,
-		listVendorUsersStmt:                   q.listVendorUsersStmt,
-		listVendorsStmt:                       q.listVendorsStmt,
-		listZonesStmt:                         q.listZonesStmt,
-		listZonesByBrandIDStmt:                q.listZonesByBrandIDStmt,
-		searchBrandCategoriesStmt:             q.searchBrandCategoriesStmt,
-		searchCategoriesStmt:                  q.searchCategoriesStmt,
-		searchInventoryHistoryStmt:            q.searchInventoryHistoryStmt,
-		searchProductInventoryStmt:            q.searchProductInventoryStmt,
-		searchProductsStmt:                    q.searchProductsStmt,
-		searchProductsByBrandIDStmt:           q.searchProductsByBrandIDStmt,
-		searchProductsByCategoryIDStmt:        q.searchProductsByCategoryIDStmt,
-		searchVendorsStmt:                     q.searchVendorsStmt,
-		searchZonesStmt:                       q.searchZonesStmt,
-		searchZonesByBrandIDStmt:              q.searchZonesByBrandIDStmt,
-		searchZonesByGeoPointStmt:             q.searchZonesByGeoPointStmt,
-		searchZonesByGeoPointAndBrandIDStmt:   q.searchZonesByGeoPointAndBrandIDStmt,
-		searchZonesByGeoPolygonStmt:           q.searchZonesByGeoPolygonStmt,
-		searchZonesByGeoPolygonAndBrandIDStmt: q.searchZonesByGeoPolygonAndBrandIDStmt,
-		updateBrandStmt:                       q.updateBrandStmt,
-		updateBrandCategoryStmt:               q.updateBrandCategoryStmt,
-		updateCategoryStmt:                    q.updateCategoryStmt,
-		updateInventoryHistoryStmt:            q.updateInventoryHistoryStmt,
-		updateOperationTimeStmt:               q.updateOperationTimeStmt,
-		updateProductStmt:                     q.updateProductStmt,
-		updateProductInventoryStmt:            q.updateProductInventoryStmt,
-		updateProductVariantStmt:              q.updateProductVariantStmt,
-		updateVendorStmt:                      q.updateVendorStmt,
-		updateVendorUserStmt:                  q.updateVendorUserStmt,
-		updateZoneStmt:                        q.updateZoneStmt,
+		db:                                     tx,
+		tx:                                     tx,
+		countCategoriesStmt:                    q.countCategoriesStmt,
+		countCategoriesByBrandIDStmt:           q.countCategoriesByBrandIDStmt,
+		countInventoryHistoryStmt:              q.countInventoryHistoryStmt,
+		countInventoryHistoryByProductIdStmt:   q.countInventoryHistoryByProductIdStmt,
+		countProductInventoryStmt:              q.countProductInventoryStmt,
+		countProductInventoryByProductIdStmt:   q.countProductInventoryByProductIdStmt,
+		countProductVariantItemsStmt:           q.countProductVariantItemsStmt,
+		countProductVariantsStmt:               q.countProductVariantsStmt,
+		countProductsStmt:                      q.countProductsStmt,
+		countProductsByBrandIDStmt:             q.countProductsByBrandIDStmt,
+		countProductsByCategoryIDStmt:          q.countProductsByCategoryIDStmt,
+		countProductsByVendorIDStmt:            q.countProductsByVendorIDStmt,
+		countVendorsStmt:                       q.countVendorsStmt,
+		countZonesStmt:                         q.countZonesStmt,
+		countZonesByBrandIDStmt:                q.countZonesByBrandIDStmt,
+		createBrandStmt:                        q.createBrandStmt,
+		createBrandCategoryStmt:                q.createBrandCategoryStmt,
+		createBrandZoneStmt:                    q.createBrandZoneStmt,
+		createCategoryStmt:                     q.createCategoryStmt,
+		createInventoryHistoryStmt:             q.createInventoryHistoryStmt,
+		createOperationTimeStmt:                q.createOperationTimeStmt,
+		createProductStmt:                      q.createProductStmt,
+		createProductInventoryStmt:             q.createProductInventoryStmt,
+		createProductVariantStmt:               q.createProductVariantStmt,
+		createProductVariantItemStmt:           q.createProductVariantItemStmt,
+		createVendorStmt:                       q.createVendorStmt,
+		createVendorUserStmt:                   q.createVendorUserStmt,
+		createZoneStmt:                         q.createZoneStmt,
+		deleteBrandStmt:                        q.deleteBrandStmt,
+		deleteBrandCategoryStmt:                q.deleteBrandCategoryStmt,
+		deleteBrandZoneStmt:                    q.deleteBrandZoneStmt,
+		deleteCategoryStmt:                     q.deleteCategoryStmt,
+		deleteInventoryHistoryStmt:             q.deleteInventoryHistoryStmt,
+		deleteOperationTimeStmt:                q.deleteOperationTimeStmt,
+		deleteProductStmt:                      q.deleteProductStmt,
+		deleteProductInventoryStmt:             q.deleteProductInventoryStmt,
+		deleteProductVariantStmt:               q.deleteProductVariantStmt,
+		deleteProductVariantItemStmt:           q.deleteProductVariantItemStmt,
+		deleteVendorStmt:                       q.deleteVendorStmt,
+		deleteVendorUserStmt:                   q.deleteVendorUserStmt,
+		deleteZoneStmt:                         q.deleteZoneStmt,
+		getBrandStmt:                           q.getBrandStmt,
+		getBrandCategoryStmt:                   q.getBrandCategoryStmt,
+		getCategoryStmt:                        q.getCategoryStmt,
+		getInventoryHistoryStmt:                q.getInventoryHistoryStmt,
+		getInventoryHistoryByProductIDStmt:     q.getInventoryHistoryByProductIDStmt,
+		getOperationTimeStmt:                   q.getOperationTimeStmt,
+		getProductStmt:                         q.getProductStmt,
+		getProductBySlugStmt:                   q.getProductBySlugStmt,
+		getProductInventoryStmt:                q.getProductInventoryStmt,
+		getProductInventoryByProductIDStmt:     q.getProductInventoryByProductIDStmt,
+		getProductVariantStmt:                  q.getProductVariantStmt,
+		getProductVariantItemStmt:              q.getProductVariantItemStmt,
+		getVendorStmt:                          q.getVendorStmt,
+		getVendorUserStmt:                      q.getVendorUserStmt,
+		getVendorUserByUsernameStmt:            q.getVendorUserByUsernameStmt,
+		getZoneStmt:                            q.getZoneStmt,
+		listBrandCategoriesStmt:                q.listBrandCategoriesStmt,
+		listBrandIdsByVendorIDStmt:             q.listBrandIdsByVendorIDStmt,
+		listBrandZonesStmt:                     q.listBrandZonesStmt,
+		listBrandsStmt:                         q.listBrandsStmt,
+		listBrandsByVendorIDStmt:               q.listBrandsByVendorIDStmt,
+		listCategoriesStmt:                     q.listCategoriesStmt,
+		listInventoryHistoryStmt:               q.listInventoryHistoryStmt,
+		listOperationTimesByBrandIdStmt:        q.listOperationTimesByBrandIdStmt,
+		listProductInventoryStmt:               q.listProductInventoryStmt,
+		listProductVariantItemsStmt:            q.listProductVariantItemsStmt,
+		listProductVariantsStmt:                q.listProductVariantsStmt,
+		listProductsStmt:                       q.listProductsStmt,
+		listProductsByBrandIDStmt:              q.listProductsByBrandIDStmt,
+		listProductsByCategoryIDStmt:           q.listProductsByCategoryIDStmt,
+		listProductsByVendorIDStmt:             q.listProductsByVendorIDStmt,
+		listVariantItemsWithProductDetailsStmt: q.listVariantItemsWithProductDetailsStmt,
+		listVendorUsersStmt:                    q.listVendorUsersStmt,
+		listVendorsStmt:                        q.listVendorsStmt,
+		listZonesStmt:                          q.listZonesStmt,
+		listZonesByBrandIDStmt:                 q.listZonesByBrandIDStmt,
+		searchBrandCategoriesStmt:              q.searchBrandCategoriesStmt,
+		searchCategoriesStmt:                   q.searchCategoriesStmt,
+		searchInventoryHistoryStmt:             q.searchInventoryHistoryStmt,
+		searchProductInventoryStmt:             q.searchProductInventoryStmt,
+		searchProductsStmt:                     q.searchProductsStmt,
+		searchProductsByBrandIDStmt:            q.searchProductsByBrandIDStmt,
+		searchProductsByCategoryIDStmt:         q.searchProductsByCategoryIDStmt,
+		searchVendorsStmt:                      q.searchVendorsStmt,
+		searchZonesStmt:                        q.searchZonesStmt,
+		searchZonesByBrandIDStmt:               q.searchZonesByBrandIDStmt,
+		searchZonesByGeoPointStmt:              q.searchZonesByGeoPointStmt,
+		searchZonesByGeoPointAndBrandIDStmt:    q.searchZonesByGeoPointAndBrandIDStmt,
+		searchZonesByGeoPolygonStmt:            q.searchZonesByGeoPolygonStmt,
+		searchZonesByGeoPolygonAndBrandIDStmt:  q.searchZonesByGeoPolygonAndBrandIDStmt,
+		updateBrandStmt:                        q.updateBrandStmt,
+		updateBrandCategoryStmt:                q.updateBrandCategoryStmt,
+		updateCategoryStmt:                     q.updateCategoryStmt,
+		updateInventoryHistoryStmt:             q.updateInventoryHistoryStmt,
+		updateOperationTimeStmt:                q.updateOperationTimeStmt,
+		updateProductStmt:                      q.updateProductStmt,
+		updateProductInventoryStmt:             q.updateProductInventoryStmt,
+		updateProductVariantStmt:               q.updateProductVariantStmt,
+		updateVendorStmt:                       q.updateVendorStmt,
+		updateVendorUserStmt:                   q.updateVendorUserStmt,
+		updateZoneStmt:                         q.updateZoneStmt,
 	}
 }

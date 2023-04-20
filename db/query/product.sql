@@ -39,16 +39,6 @@ SELECT * FROM products WHERE id = $1;
 -- name: GetProductBySlug :one
 SELECT * FROM products WHERE slug = $1;
 
--- name: GetProductWithVariants :one
-SELECT p.id AS product_id, p.name AS product_name, 
-       v.id AS variant_id, v.title AS variant_title,
-       json_agg(json_build_object('id', vi.id, 'name', vi.name)) AS variant_items
-FROM products p
-JOIN product_variants v ON v.product_id = p.id
-JOIN product_variant_items vi ON vi.variant_id = v.id
-WHERE p.id = $1
-GROUP BY p.id, v.id;
-
 -- name: ListProducts :many
 SELECT * FROM products ORDER BY id LIMIT $1 OFFSET $2;
 
@@ -139,4 +129,9 @@ SELECT * FROM product_variant_items WHERE variant_id = $1 ORDER BY id LIMIT $2 O
 
 -- name: CountProductVariantItems :one
 SELECT COUNT(*) FROM product_variant_items WHERE variant_id = $1;
+
+-- name: ListVariantItemsWithProductDetails :many
+SELECT product_variant_items.*, products.* FROM product_variant_items
+INNER JOIN products ON product_variant_items.product_id = products.id
+WHERE variant_id = $1 ORDER BY product_variant_items.id;
 

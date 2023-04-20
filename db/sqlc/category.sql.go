@@ -109,16 +109,11 @@ func (q *Queries) DeleteCategory(ctx context.Context, id int64) error {
 }
 
 const getBrandCategory = `-- name: GetBrandCategory :one
-SELECT id, brand_id, category_id, name, created_at FROM brand_categories WHERE brand_id = $1 AND id = $2
+SELECT id, brand_id, category_id, name, created_at FROM brand_categories WHERE id = $1
 `
 
-type GetBrandCategoryParams struct {
-	BrandID int64 `json:"brand_id"`
-	ID      int64 `json:"id"`
-}
-
-func (q *Queries) GetBrandCategory(ctx context.Context, arg GetBrandCategoryParams) (BrandCategory, error) {
-	row := q.queryRow(ctx, q.getBrandCategoryStmt, getBrandCategory, arg.BrandID, arg.ID)
+func (q *Queries) GetBrandCategory(ctx context.Context, id int64) (BrandCategory, error) {
+	row := q.queryRow(ctx, q.getBrandCategoryStmt, getBrandCategory, id)
 	var i BrandCategory
 	err := row.Scan(
 		&i.ID,

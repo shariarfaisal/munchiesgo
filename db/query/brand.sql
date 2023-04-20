@@ -53,6 +53,8 @@ SELECT * FROM brands ORDER BY id LIMIT $1 OFFSET $2;
 -- name: ListBrandsByVendorID :many
 SELECT * FROM brands WHERE vendor_id = $1 ORDER BY id LIMIT $2 OFFSET $3;
 
+-- name: ListBrandIdsByVendorID :many
+SELECT id FROM brands WHERE vendor_id = $1;
 
 -- name: CreateOperationTime :one
 INSERT INTO operation_times (

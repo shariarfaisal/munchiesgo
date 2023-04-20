@@ -7,7 +7,7 @@ package db
 
 import (
 	"context"
-	"encoding/json"
+	"time"
 )
 
 const countProductVariantItems = `-- name: CountProductVariantItems :one
@@ -317,38 +317,6 @@ func (q *Queries) GetProductVariantItem(ctx context.Context, id int64) (ProductV
 	return i, err
 }
 
-const getProductWithVariants = `-- name: GetProductWithVariants :one
-SELECT p.id AS product_id, p.name AS product_name, 
-       v.id AS variant_id, v.title AS variant_title,
-       json_agg(json_build_object('id', vi.id, 'name', vi.name)) AS variant_items
-FROM products p
-JOIN product_variants v ON v.product_id = p.id
-JOIN product_variant_items vi ON vi.variant_id = v.id
-WHERE p.id = $1
-GROUP BY p.id, v.id
-`
-
-type GetProductWithVariantsRow struct {
-	ProductID    int64           `json:"product_id"`
-	ProductName  string          `json:"product_name"`
-	VariantID    int64           `json:"variant_id"`
-	VariantTitle string          `json:"variant_title"`
-	VariantItems json.RawMessage `json:"variant_items"`
-}
-
-func (q *Queries) GetProductWithVariants(ctx context.Context, id int64) (GetProductWithVariantsRow, error) {
-	row := q.queryRow(ctx, q.getProductWithVariantsStmt, getProductWithVariants, id)
-	var i GetProductWithVariantsRow
-	err := row.Scan(
-		&i.ProductID,
-		&i.ProductName,
-		&i.VariantID,
-		&i.VariantTitle,
-		&i.VariantItems,
-	)
-	return i, err
-}
-
 const listProductVariantItems = `-- name: ListProductVariantItems :many
 SELECT id, variant_id, product_id, created_at FROM product_variant_items WHERE variant_id = $1 ORDER BY id LIMIT $2 OFFSET $3
 `
@@ -607,6 +575,75 @@ func (q *Queries) ListProductsByVendorID(ctx context.Context, arg ListProductsBy
 			&i.Availability,
 			&i.UseInventory,
 			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listVariantItemsWithProductDetails = `-- name: ListVariantItemsWithProductDetails :many
+SELECT product_variant_items.id, product_variant_items.variant_id, product_variant_items.product_id, product_variant_items.created_at, products.id, products.type, products.name, products.category_id, products.slug, products.image, products.details, products.price, products.status, products.brand_id, products.availability, products.use_inventory, products.created_at, products.updated_at FROM product_variant_items
+INNER JOIN products ON product_variant_items.product_id = products.id
+WHERE variant_id = $1 ORDER BY product_variant_items.id
+`
+
+type ListVariantItemsWithProductDetailsRow struct {
+	ID           int64     `json:"id"`
+	VariantID    int64     `json:"variant_id"`
+	ProductID    int64     `json:"product_id"`
+	CreatedAt    time.Time `json:"created_at"`
+	ID_2         int64     `json:"id_2"`
+	Type         string    `json:"type"`
+	Name         string    `json:"name"`
+	CategoryID   int64     `json:"category_id"`
+	Slug         string    `json:"slug"`
+	Image        string    `json:"image"`
+	Details      string    `json:"details"`
+	Price        float64   `json:"price"`
+	Status       string    `json:"status"`
+	BrandID      int64     `json:"brand_id"`
+	Availability bool      `json:"availability"`
+	UseInventory bool      `json:"use_inventory"`
+	CreatedAt_2  time.Time `json:"created_at_2"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+func (q *Queries) ListVariantItemsWithProductDetails(ctx context.Context, variantID int64) ([]ListVariantItemsWithProductDetailsRow, error) {
+	rows, err := q.query(ctx, q.listVariantItemsWithProductDetailsStmt, listVariantItemsWithProductDetails, variantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListVariantItemsWithProductDetailsRow{}
+	for rows.Next() {
+		var i ListVariantItemsWithProductDetailsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.VariantID,
+			&i.ProductID,
+			&i.CreatedAt,
+			&i.ID_2,
+			&i.Type,
+			&i.Name,
+			&i.CategoryID,
+			&i.Slug,
+			&i.Image,
+			&i.Details,
+			&i.Price,
+			&i.Status,
+			&i.BrandID,
+			&i.Availability,
+			&i.UseInventory,
+			&i.CreatedAt_2,
 			&i.UpdatedAt,
 		); err != nil {
 			return nil, err

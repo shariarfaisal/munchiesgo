@@ -66,7 +66,7 @@ CREATE TABLE "brands" (
 
 CREATE TABLE "categories" (
   "id" bigserial PRIMARY KEY,
-  "name" varchar NOT NULL,
+  "name" varchar UNIQUE NOT NULL,
   "image" varchar NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );

@@ -196,6 +196,33 @@ func (q *Queries) GetOperationTime(ctx context.Context, id int64) (OperationTime
 	return i, err
 }
 
+const listBrandIdsByVendorID = `-- name: ListBrandIdsByVendorID :many
+SELECT id FROM brands WHERE vendor_id = $1
+`
+
+func (q *Queries) ListBrandIdsByVendorID(ctx context.Context, vendorID int64) ([]int64, error) {
+	rows, err := q.query(ctx, q.listBrandIdsByVendorIDStmt, listBrandIdsByVendorID, vendorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listBrands = `-- name: ListBrands :many
 SELECT id, name, meta_tags, slug, type, phone, email, email_verified, logo, banner, rating, vendor_id, prefix, status, availability, location, address, created_at FROM brands ORDER BY id LIMIT $1 OFFSET $2
 `

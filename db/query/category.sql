@@ -41,7 +41,7 @@ WHERE brand_id = $1 AND id = $3
 RETURNING *;
 
 -- name: GetBrandCategory :one
-SELECT * FROM brand_categories WHERE brand_id = $1 AND id = $2;
+SELECT * FROM brand_categories WHERE id = $1;
 
 -- name: SearchBrandCategories :many
 SELECT * FROM brand_categories WHERE brand_id = $1 AND name ILIKE '%' || $2 || '%' ORDER BY id LIMIT $3 OFFSET $4;

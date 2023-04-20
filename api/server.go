@@ -69,11 +69,37 @@ func (server *Server) routerSetup() {
 		brandGroup.GET("/:id", server.getBrand)
 		brandGroup.PUT("/:id", server.updateBrand)
 		brandGroup.DELETE("/:id", server.deleteBrand)
+
 		// brand operation times
 		brandGroup.GET("/:id/operation_time", server.getOperationTimes)
 		brandGroup.POST("/:id/operation_time", server.addOperationTime)
 		brandGroup.PUT("/operation_time/:id", server.updateOperationTime)
 		brandGroup.DELETE("/operation_time/:id", server.deleteOperationTime)
+
+		// brand categories
+		brandGroup.POST("/:id/category", server.createBrandCategory)
+		brandGroup.POST("/:id/category/:categoryId", server.updateBrandCategory)
+		brandGroup.GET("/:id/category/:categoryId", server.updateBrandCategory)
+		brandGroup.GET("/:id/category", server.listBrandCategories)
+		brandGroup.DELETE("/:id/category/:categoryId", server.deleteBrandCategory)
+	}
+
+	// category routes
+	// FIXME: add auth middleware for admin
+	categoryGroup := router.Group("/api/category", authMiddleware(server.tokenMaker))
+	{
+		categoryGroup.POST("/", server.createCategory)
+		categoryGroup.GET("/", server.listCategories)
+		categoryGroup.GET("/:id", server.getCategory)
+		categoryGroup.PUT("/:id", server.updateCategory)
+		categoryGroup.DELETE("/:id", server.deleteCategory)
+	}
+
+	// product routes
+	productGroup := router.Group("/api/product", authMiddleware(server.tokenMaker))
+	{
+		productGroup.POST("/", server.createProduct)
+		productGroup.GET("/:id/details", server.getProductDetails)
 	}
 
 	server.router = router

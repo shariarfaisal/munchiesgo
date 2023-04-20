@@ -4,6 +4,8 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"strings"
+
+	"github.com/Munchies-Engineering/backend/util"
 )
 
 type Point struct {
@@ -41,7 +43,15 @@ func getPoint(v interface{}) *Point {
 }
 
 func getBrandsSlug(name string, vendorId int64) string {
-	return strings.ReplaceAll(name, " ", "-") + "-" + fmt.Sprintf("%d", vendorId)
+	return strings.ReplaceAll(name, " ", "-") + "-" + fmt.Sprintf("%d", vendorId) + "-" + util.RandomString(10)
+}
+
+func getProductSlug(name string, brandId int64, categoryId int64) string {
+	return strings.ReplaceAll(name, " ", "-") + "-" + fmt.Sprintf("%d", brandId) + "-" + fmt.Sprintf("%d", categoryId) + "-" + util.RandomString(10)
+}
+
+func getProductVariantSlug(productName string, name string, brandId int64, categoryId int64) string {
+	return strings.ReplaceAll(productName, " ", "-") + "-" + strings.ReplaceAll(name, " ", "-") + "-" + fmt.Sprintf("%d", brandId) + "-" + fmt.Sprintf("%d", categoryId) + "-" + util.RandomString(10)
 }
 
 func getPrefix(name string) string {
