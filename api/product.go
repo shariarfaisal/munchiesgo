@@ -13,21 +13,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var (
-	ProductStatusPending string = "pending"
-	ProductStatusActive  string = "active"
-)
-
-var (
-	ProductTypeProduct string = "product"
-	ProductTypeVariant string = "variant"
-)
-
 type createProductVariantItemRequest struct {
 	Name         string  `json:"name" binding:"required"`
 	Image        string  `json:"image" binding:"required"`
 	Details      string  `json:"details" binding:"required"`
-	Price        float64 `json:"price" binding:"required,min=0"`
+	Price        float64 `json:"price" binding:"min=0"`
 	Availability bool    `json:"availability" binding:"required"`
 }
 
@@ -43,7 +33,7 @@ type createProductRequest struct {
 	CategoryID   int64                         `json:"categoryId" binding:"required,min=1"`
 	Image        string                        `json:"image" binding:"required"`
 	Details      string                        `json:"details" binding:"required"`
-	Price        float64                       `json:"price" binding:"required,min=0"`
+	Price        float64                       `json:"price" binding:"min=0"`
 	BrandID      int64                         `json:"brandId" binding:"required,min=1"`
 	Availability bool                          `json:"availability" binding:"required"`
 	Variant      []createProductVariantRequest `json:"variant,omitempty" binding:"omitempty"`
@@ -145,14 +135,14 @@ func (server *Server) createProduct(ctx *gin.Context) {
 	args := []db.ProductUploadParams{}
 	for _, product := range req {
 		arg := db.ProductUploadParams{
-			Type:         ProductTypeProduct,
+			Type:         db.ProductTypeProduct,
 			Name:         product.Name,
 			Slug:         getProductSlug(product.Name, product.BrandID, product.CategoryID),
 			CategoryID:   product.CategoryID,
 			Image:        product.Image,
 			Details:      product.Details,
 			Price:        product.Price,
-			Status:       ProductStatusPending,
+			Status:       db.ProductStatusPending,
 			BrandID:      product.BrandID,
 			Availability: product.Availability,
 		}
@@ -177,8 +167,8 @@ func (server *Server) createProduct(ctx *gin.Context) {
 					errText = "maxSelect must be greater than 0"
 				} else if len(variant.Items) < int(variantArg.MinSelect) {
 					errText = "minSelect must be less than or equal to the number of items"
-				} else if len(variant.Items) > int(variantArg.MaxSelect) {
-					errText = "maxSelect must be greater than or equal to the number of items"
+				} else if len(variant.Items) < int(variantArg.MaxSelect) {
+					errText = "maxSelect must be less than or equal to the number of items"
 				} else if len(variant.Items) == 0 {
 					errText = "variant must have at least 1 item"
 				}
@@ -192,8 +182,8 @@ func (server *Server) createProduct(ctx *gin.Context) {
 
 				for _, item := range variant.Items {
 					variantArg.Items = append(variantArg.Items, db.ProductUploadParams{
-						Type:         ProductTypeVariant,
-						Status:       ProductStatusPending,
+						Type:         db.ProductTypeVariant,
+						Status:       db.ProductStatusPending,
 						Name:         item.Name,
 						Slug:         getProductVariantSlug(product.Name, item.Name, product.BrandID, product.CategoryID),
 						Image:        item.Image,

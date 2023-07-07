@@ -10,8 +10,15 @@ type Store interface {
 	Querier
 	BulkProductUpload(ctx context.Context, args []ProductUploadParams) ([]Product, error)
 	FullProduct(ctx context.Context, id int64) (*FullProduct, error)
-	BrandsWithIds(ctx context.Context, ids []int64) ([]BrandsWithIdsRow, error)
-	BrandCategoriesByIds(ctx context.Context, ids []int64) ([]GetBrandCategoriesByIdsRow, error)
+	BrandsWithIds(ctx context.Context, ids []int64) ([]Brand, error)
+	BrandCategoriesByIds(ctx context.Context, ids []int64) ([]BrandCategory, error)
+	ProductsByIds(ctx context.Context, ids []int64) ([]Product, error)
+	ProductsTypeByIds(ctx context.Context, ids []int64) ([]ProductsTypeByIdsRow, error)
+	ProductVariantsByProductIds(ctx context.Context, ids []int64) ([]ProductVariant, error)
+	ProductVariantsItemsByProductIds(ctx context.Context, ids []int64) ([]ProductVariantItem, error)
+	OrderItemProducts(ctx context.Context, orderItems []PlaceOrderItemParams) ([]*OrderItemProduct, error)
+	ProductVariantsByIds(ctx context.Context, ids []int64) ([]ProductVariant, error)
+	PlaceOrder(ctx context.Context, arg PlaceOrderParams) (*Order, error)
 }
 
 type SqlStore struct {

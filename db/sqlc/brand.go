@@ -6,14 +6,8 @@ import (
 	"github.com/lib/pq"
 )
 
-type BrandsWithIdsRow struct {
-	ID       int64  `json:"id"`
-	Name     string `json:"name"`
-	VendorID int64  `json:"vendor_id"`
-}
-
-func (store *SqlStore) BrandsWithIds(ctx context.Context, ids []int64) ([]BrandsWithIdsRow, error) {
-	const brandsWithIds = `SELECT id, name, vendor_id FROM brands WHERE id = ANY($1)`
+func (store *SqlStore) BrandsWithIds(ctx context.Context, ids []int64) ([]Brand, error) {
+	const brandsWithIds = `SELECT * FROM brands WHERE id = ANY($1)`
 	rows, err := store.db.QueryContext(ctx, brandsWithIds, pq.Array(ids))
 	if err != nil {
 		return nil, err
@@ -21,10 +15,29 @@ func (store *SqlStore) BrandsWithIds(ctx context.Context, ids []int64) ([]Brands
 
 	defer rows.Close()
 
-	var items []BrandsWithIdsRow
+	var items []Brand
 	for rows.Next() {
-		var item BrandsWithIdsRow
-		err := rows.Scan(&item.ID, &item.Name, &item.VendorID)
+		var item Brand
+		err := rows.Scan(
+			&item.ID,
+			&item.Name,
+			&item.MetaTags,
+			&item.Slug,
+			&item.Type,
+			&item.Phone,
+			&item.Email,
+			&item.EmailVerified,
+			&item.Logo,
+			&item.Banner,
+			&item.Rating,
+			&item.VendorID,
+			&item.Prefix,
+			&item.Status,
+			&item.Availability,
+			&item.Location,
+			&item.Address,
+			&item.CreatedAt,
+		)
 		if err != nil {
 			return nil, err
 		}

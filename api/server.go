@@ -102,6 +102,18 @@ func (server *Server) routerSetup() {
 		productGroup.GET("/:id/details", server.getProductDetails)
 	}
 
+	// customer routes
+	customerGroup := router.Group("/api/customer")
+	{
+		customerGroup.POST("/signup", server.customerSignUp)
+	}
+
+	// order routes
+	orderGroup := router.Group("/api/order")
+	{
+		orderGroup.POST("/", server.createOrder)
+	}
+
 	server.router = router
 }
 

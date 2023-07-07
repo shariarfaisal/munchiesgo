@@ -75,17 +75,35 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createBrandCategoryStmt, err = db.PrepareContext(ctx, createBrandCategory); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateBrandCategory: %w", err)
 	}
+	if q.createBrandOrderStmt, err = db.PrepareContext(ctx, createBrandOrder); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateBrandOrder: %w", err)
+	}
 	if q.createBrandZoneStmt, err = db.PrepareContext(ctx, createBrandZone); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateBrandZone: %w", err)
 	}
 	if q.createCategoryStmt, err = db.PrepareContext(ctx, createCategory); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateCategory: %w", err)
 	}
+	if q.createCustomerStmt, err = db.PrepareContext(ctx, createCustomer); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateCustomer: %w", err)
+	}
+	if q.createCustomerAddressStmt, err = db.PrepareContext(ctx, createCustomerAddress); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateCustomerAddress: %w", err)
+	}
+	if q.createDeliveryAddressStmt, err = db.PrepareContext(ctx, createDeliveryAddress); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateDeliveryAddress: %w", err)
+	}
 	if q.createInventoryHistoryStmt, err = db.PrepareContext(ctx, createInventoryHistory); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateInventoryHistory: %w", err)
 	}
 	if q.createOperationTimeStmt, err = db.PrepareContext(ctx, createOperationTime); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateOperationTime: %w", err)
+	}
+	if q.createOrderStmt, err = db.PrepareContext(ctx, createOrder); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateOrder: %w", err)
+	}
+	if q.createOrderItemStmt, err = db.PrepareContext(ctx, createOrderItem); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateOrderItem: %w", err)
 	}
 	if q.createProductStmt, err = db.PrepareContext(ctx, createProduct); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateProduct: %w", err)
@@ -98,6 +116,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.createProductVariantItemStmt, err = db.PrepareContext(ctx, createProductVariantItem); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateProductVariantItem: %w", err)
+	}
+	if q.createRiderStmt, err = db.PrepareContext(ctx, createRider); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateRider: %w", err)
+	}
+	if q.createRiderAssignStmt, err = db.PrepareContext(ctx, createRiderAssign); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateRiderAssign: %w", err)
 	}
 	if q.createVendorStmt, err = db.PrepareContext(ctx, createVendor); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateVendor: %w", err)
@@ -153,8 +177,20 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getBrandCategoryStmt, err = db.PrepareContext(ctx, getBrandCategory); err != nil {
 		return nil, fmt.Errorf("error preparing query GetBrandCategory: %w", err)
 	}
+	if q.getBrandOrderStmt, err = db.PrepareContext(ctx, getBrandOrder); err != nil {
+		return nil, fmt.Errorf("error preparing query GetBrandOrder: %w", err)
+	}
 	if q.getCategoryStmt, err = db.PrepareContext(ctx, getCategory); err != nil {
 		return nil, fmt.Errorf("error preparing query GetCategory: %w", err)
+	}
+	if q.getCustomerStmt, err = db.PrepareContext(ctx, getCustomer); err != nil {
+		return nil, fmt.Errorf("error preparing query GetCustomer: %w", err)
+	}
+	if q.getCustomerAddressStmt, err = db.PrepareContext(ctx, getCustomerAddress); err != nil {
+		return nil, fmt.Errorf("error preparing query GetCustomerAddress: %w", err)
+	}
+	if q.getDeliveryAddressStmt, err = db.PrepareContext(ctx, getDeliveryAddress); err != nil {
+		return nil, fmt.Errorf("error preparing query GetDeliveryAddress: %w", err)
 	}
 	if q.getInventoryHistoryStmt, err = db.PrepareContext(ctx, getInventoryHistory); err != nil {
 		return nil, fmt.Errorf("error preparing query GetInventoryHistory: %w", err)
@@ -164,6 +200,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getOperationTimeStmt, err = db.PrepareContext(ctx, getOperationTime); err != nil {
 		return nil, fmt.Errorf("error preparing query GetOperationTime: %w", err)
+	}
+	if q.getOrderStmt, err = db.PrepareContext(ctx, getOrder); err != nil {
+		return nil, fmt.Errorf("error preparing query GetOrder: %w", err)
+	}
+	if q.getOrderItemStmt, err = db.PrepareContext(ctx, getOrderItem); err != nil {
+		return nil, fmt.Errorf("error preparing query GetOrderItem: %w", err)
 	}
 	if q.getProductStmt, err = db.PrepareContext(ctx, getProduct); err != nil {
 		return nil, fmt.Errorf("error preparing query GetProduct: %w", err)
@@ -183,6 +225,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getProductVariantItemStmt, err = db.PrepareContext(ctx, getProductVariantItem); err != nil {
 		return nil, fmt.Errorf("error preparing query GetProductVariantItem: %w", err)
 	}
+	if q.getRiderStmt, err = db.PrepareContext(ctx, getRider); err != nil {
+		return nil, fmt.Errorf("error preparing query GetRider: %w", err)
+	}
+	if q.getRiderAssignStmt, err = db.PrepareContext(ctx, getRiderAssign); err != nil {
+		return nil, fmt.Errorf("error preparing query GetRiderAssign: %w", err)
+	}
 	if q.getVendorStmt, err = db.PrepareContext(ctx, getVendor); err != nil {
 		return nil, fmt.Errorf("error preparing query GetVendor: %w", err)
 	}
@@ -201,6 +249,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.listBrandIdsByVendorIDStmt, err = db.PrepareContext(ctx, listBrandIdsByVendorID); err != nil {
 		return nil, fmt.Errorf("error preparing query ListBrandIdsByVendorID: %w", err)
 	}
+	if q.listBrandOrdersByBrandIdStmt, err = db.PrepareContext(ctx, listBrandOrdersByBrandId); err != nil {
+		return nil, fmt.Errorf("error preparing query ListBrandOrdersByBrandId: %w", err)
+	}
+	if q.listBrandOrdersByOrderIdStmt, err = db.PrepareContext(ctx, listBrandOrdersByOrderId); err != nil {
+		return nil, fmt.Errorf("error preparing query ListBrandOrdersByOrderId: %w", err)
+	}
 	if q.listBrandZonesStmt, err = db.PrepareContext(ctx, listBrandZones); err != nil {
 		return nil, fmt.Errorf("error preparing query ListBrandZones: %w", err)
 	}
@@ -213,11 +267,26 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.listCategoriesStmt, err = db.PrepareContext(ctx, listCategories); err != nil {
 		return nil, fmt.Errorf("error preparing query ListCategories: %w", err)
 	}
+	if q.listCustomerAddressesStmt, err = db.PrepareContext(ctx, listCustomerAddresses); err != nil {
+		return nil, fmt.Errorf("error preparing query ListCustomerAddresses: %w", err)
+	}
 	if q.listInventoryHistoryStmt, err = db.PrepareContext(ctx, listInventoryHistory); err != nil {
 		return nil, fmt.Errorf("error preparing query ListInventoryHistory: %w", err)
 	}
 	if q.listOperationTimesByBrandIdStmt, err = db.PrepareContext(ctx, listOperationTimesByBrandId); err != nil {
 		return nil, fmt.Errorf("error preparing query ListOperationTimesByBrandId: %w", err)
+	}
+	if q.listOrderStmt, err = db.PrepareContext(ctx, listOrder); err != nil {
+		return nil, fmt.Errorf("error preparing query ListOrder: %w", err)
+	}
+	if q.listOrderByCustomerIdStmt, err = db.PrepareContext(ctx, listOrderByCustomerId); err != nil {
+		return nil, fmt.Errorf("error preparing query ListOrderByCustomerId: %w", err)
+	}
+	if q.listOrderItemsByBrandIdStmt, err = db.PrepareContext(ctx, listOrderItemsByBrandId); err != nil {
+		return nil, fmt.Errorf("error preparing query ListOrderItemsByBrandId: %w", err)
+	}
+	if q.listOrderItemsByOrderIdStmt, err = db.PrepareContext(ctx, listOrderItemsByOrderId); err != nil {
+		return nil, fmt.Errorf("error preparing query ListOrderItemsByOrderId: %w", err)
 	}
 	if q.listProductInventoryStmt, err = db.PrepareContext(ctx, listProductInventory); err != nil {
 		return nil, fmt.Errorf("error preparing query ListProductInventory: %w", err)
@@ -239,6 +308,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.listProductsByVendorIDStmt, err = db.PrepareContext(ctx, listProductsByVendorID); err != nil {
 		return nil, fmt.Errorf("error preparing query ListProductsByVendorID: %w", err)
+	}
+	if q.listRiderStmt, err = db.PrepareContext(ctx, listRider); err != nil {
+		return nil, fmt.Errorf("error preparing query ListRider: %w", err)
+	}
+	if q.listRiderAssignByRiderIdStmt, err = db.PrepareContext(ctx, listRiderAssignByRiderId); err != nil {
+		return nil, fmt.Errorf("error preparing query ListRiderAssignByRiderId: %w", err)
 	}
 	if q.listVariantItemsWithProductDetailsStmt, err = db.PrepareContext(ctx, listVariantItemsWithProductDetails); err != nil {
 		return nil, fmt.Errorf("error preparing query ListVariantItemsWithProductDetails: %w", err)
@@ -420,6 +495,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createBrandCategoryStmt: %w", cerr)
 		}
 	}
+	if q.createBrandOrderStmt != nil {
+		if cerr := q.createBrandOrderStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createBrandOrderStmt: %w", cerr)
+		}
+	}
 	if q.createBrandZoneStmt != nil {
 		if cerr := q.createBrandZoneStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createBrandZoneStmt: %w", cerr)
@@ -430,6 +510,21 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createCategoryStmt: %w", cerr)
 		}
 	}
+	if q.createCustomerStmt != nil {
+		if cerr := q.createCustomerStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createCustomerStmt: %w", cerr)
+		}
+	}
+	if q.createCustomerAddressStmt != nil {
+		if cerr := q.createCustomerAddressStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createCustomerAddressStmt: %w", cerr)
+		}
+	}
+	if q.createDeliveryAddressStmt != nil {
+		if cerr := q.createDeliveryAddressStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createDeliveryAddressStmt: %w", cerr)
+		}
+	}
 	if q.createInventoryHistoryStmt != nil {
 		if cerr := q.createInventoryHistoryStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createInventoryHistoryStmt: %w", cerr)
@@ -438,6 +533,16 @@ func (q *Queries) Close() error {
 	if q.createOperationTimeStmt != nil {
 		if cerr := q.createOperationTimeStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createOperationTimeStmt: %w", cerr)
+		}
+	}
+	if q.createOrderStmt != nil {
+		if cerr := q.createOrderStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createOrderStmt: %w", cerr)
+		}
+	}
+	if q.createOrderItemStmt != nil {
+		if cerr := q.createOrderItemStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createOrderItemStmt: %w", cerr)
 		}
 	}
 	if q.createProductStmt != nil {
@@ -458,6 +563,16 @@ func (q *Queries) Close() error {
 	if q.createProductVariantItemStmt != nil {
 		if cerr := q.createProductVariantItemStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createProductVariantItemStmt: %w", cerr)
+		}
+	}
+	if q.createRiderStmt != nil {
+		if cerr := q.createRiderStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createRiderStmt: %w", cerr)
+		}
+	}
+	if q.createRiderAssignStmt != nil {
+		if cerr := q.createRiderAssignStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createRiderAssignStmt: %w", cerr)
 		}
 	}
 	if q.createVendorStmt != nil {
@@ -550,9 +665,29 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getBrandCategoryStmt: %w", cerr)
 		}
 	}
+	if q.getBrandOrderStmt != nil {
+		if cerr := q.getBrandOrderStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getBrandOrderStmt: %w", cerr)
+		}
+	}
 	if q.getCategoryStmt != nil {
 		if cerr := q.getCategoryStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getCategoryStmt: %w", cerr)
+		}
+	}
+	if q.getCustomerStmt != nil {
+		if cerr := q.getCustomerStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getCustomerStmt: %w", cerr)
+		}
+	}
+	if q.getCustomerAddressStmt != nil {
+		if cerr := q.getCustomerAddressStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getCustomerAddressStmt: %w", cerr)
+		}
+	}
+	if q.getDeliveryAddressStmt != nil {
+		if cerr := q.getDeliveryAddressStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getDeliveryAddressStmt: %w", cerr)
 		}
 	}
 	if q.getInventoryHistoryStmt != nil {
@@ -568,6 +703,16 @@ func (q *Queries) Close() error {
 	if q.getOperationTimeStmt != nil {
 		if cerr := q.getOperationTimeStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getOperationTimeStmt: %w", cerr)
+		}
+	}
+	if q.getOrderStmt != nil {
+		if cerr := q.getOrderStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getOrderStmt: %w", cerr)
+		}
+	}
+	if q.getOrderItemStmt != nil {
+		if cerr := q.getOrderItemStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getOrderItemStmt: %w", cerr)
 		}
 	}
 	if q.getProductStmt != nil {
@@ -600,6 +745,16 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getProductVariantItemStmt: %w", cerr)
 		}
 	}
+	if q.getRiderStmt != nil {
+		if cerr := q.getRiderStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getRiderStmt: %w", cerr)
+		}
+	}
+	if q.getRiderAssignStmt != nil {
+		if cerr := q.getRiderAssignStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getRiderAssignStmt: %w", cerr)
+		}
+	}
 	if q.getVendorStmt != nil {
 		if cerr := q.getVendorStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getVendorStmt: %w", cerr)
@@ -630,6 +785,16 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing listBrandIdsByVendorIDStmt: %w", cerr)
 		}
 	}
+	if q.listBrandOrdersByBrandIdStmt != nil {
+		if cerr := q.listBrandOrdersByBrandIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listBrandOrdersByBrandIdStmt: %w", cerr)
+		}
+	}
+	if q.listBrandOrdersByOrderIdStmt != nil {
+		if cerr := q.listBrandOrdersByOrderIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listBrandOrdersByOrderIdStmt: %w", cerr)
+		}
+	}
 	if q.listBrandZonesStmt != nil {
 		if cerr := q.listBrandZonesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing listBrandZonesStmt: %w", cerr)
@@ -650,6 +815,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing listCategoriesStmt: %w", cerr)
 		}
 	}
+	if q.listCustomerAddressesStmt != nil {
+		if cerr := q.listCustomerAddressesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listCustomerAddressesStmt: %w", cerr)
+		}
+	}
 	if q.listInventoryHistoryStmt != nil {
 		if cerr := q.listInventoryHistoryStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing listInventoryHistoryStmt: %w", cerr)
@@ -658,6 +828,26 @@ func (q *Queries) Close() error {
 	if q.listOperationTimesByBrandIdStmt != nil {
 		if cerr := q.listOperationTimesByBrandIdStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing listOperationTimesByBrandIdStmt: %w", cerr)
+		}
+	}
+	if q.listOrderStmt != nil {
+		if cerr := q.listOrderStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listOrderStmt: %w", cerr)
+		}
+	}
+	if q.listOrderByCustomerIdStmt != nil {
+		if cerr := q.listOrderByCustomerIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listOrderByCustomerIdStmt: %w", cerr)
+		}
+	}
+	if q.listOrderItemsByBrandIdStmt != nil {
+		if cerr := q.listOrderItemsByBrandIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listOrderItemsByBrandIdStmt: %w", cerr)
+		}
+	}
+	if q.listOrderItemsByOrderIdStmt != nil {
+		if cerr := q.listOrderItemsByOrderIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listOrderItemsByOrderIdStmt: %w", cerr)
 		}
 	}
 	if q.listProductInventoryStmt != nil {
@@ -693,6 +883,16 @@ func (q *Queries) Close() error {
 	if q.listProductsByVendorIDStmt != nil {
 		if cerr := q.listProductsByVendorIDStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing listProductsByVendorIDStmt: %w", cerr)
+		}
+	}
+	if q.listRiderStmt != nil {
+		if cerr := q.listRiderStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listRiderStmt: %w", cerr)
+		}
+	}
+	if q.listRiderAssignByRiderIdStmt != nil {
+		if cerr := q.listRiderAssignByRiderIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listRiderAssignByRiderIdStmt: %w", cerr)
 		}
 	}
 	if q.listVariantItemsWithProductDetailsStmt != nil {
@@ -901,14 +1101,22 @@ type Queries struct {
 	countZonesByBrandIDStmt                *sql.Stmt
 	createBrandStmt                        *sql.Stmt
 	createBrandCategoryStmt                *sql.Stmt
+	createBrandOrderStmt                   *sql.Stmt
 	createBrandZoneStmt                    *sql.Stmt
 	createCategoryStmt                     *sql.Stmt
+	createCustomerStmt                     *sql.Stmt
+	createCustomerAddressStmt              *sql.Stmt
+	createDeliveryAddressStmt              *sql.Stmt
 	createInventoryHistoryStmt             *sql.Stmt
 	createOperationTimeStmt                *sql.Stmt
+	createOrderStmt                        *sql.Stmt
+	createOrderItemStmt                    *sql.Stmt
 	createProductStmt                      *sql.Stmt
 	createProductInventoryStmt             *sql.Stmt
 	createProductVariantStmt               *sql.Stmt
 	createProductVariantItemStmt           *sql.Stmt
+	createRiderStmt                        *sql.Stmt
+	createRiderAssignStmt                  *sql.Stmt
 	createVendorStmt                       *sql.Stmt
 	createVendorUserStmt                   *sql.Stmt
 	createZoneStmt                         *sql.Stmt
@@ -927,28 +1135,43 @@ type Queries struct {
 	deleteZoneStmt                         *sql.Stmt
 	getBrandStmt                           *sql.Stmt
 	getBrandCategoryStmt                   *sql.Stmt
+	getBrandOrderStmt                      *sql.Stmt
 	getCategoryStmt                        *sql.Stmt
+	getCustomerStmt                        *sql.Stmt
+	getCustomerAddressStmt                 *sql.Stmt
+	getDeliveryAddressStmt                 *sql.Stmt
 	getInventoryHistoryStmt                *sql.Stmt
 	getInventoryHistoryByProductIDStmt     *sql.Stmt
 	getOperationTimeStmt                   *sql.Stmt
+	getOrderStmt                           *sql.Stmt
+	getOrderItemStmt                       *sql.Stmt
 	getProductStmt                         *sql.Stmt
 	getProductBySlugStmt                   *sql.Stmt
 	getProductInventoryStmt                *sql.Stmt
 	getProductInventoryByProductIDStmt     *sql.Stmt
 	getProductVariantStmt                  *sql.Stmt
 	getProductVariantItemStmt              *sql.Stmt
+	getRiderStmt                           *sql.Stmt
+	getRiderAssignStmt                     *sql.Stmt
 	getVendorStmt                          *sql.Stmt
 	getVendorUserStmt                      *sql.Stmt
 	getVendorUserByUsernameStmt            *sql.Stmt
 	getZoneStmt                            *sql.Stmt
 	listBrandCategoriesStmt                *sql.Stmt
 	listBrandIdsByVendorIDStmt             *sql.Stmt
+	listBrandOrdersByBrandIdStmt           *sql.Stmt
+	listBrandOrdersByOrderIdStmt           *sql.Stmt
 	listBrandZonesStmt                     *sql.Stmt
 	listBrandsStmt                         *sql.Stmt
 	listBrandsByVendorIDStmt               *sql.Stmt
 	listCategoriesStmt                     *sql.Stmt
+	listCustomerAddressesStmt              *sql.Stmt
 	listInventoryHistoryStmt               *sql.Stmt
 	listOperationTimesByBrandIdStmt        *sql.Stmt
+	listOrderStmt                          *sql.Stmt
+	listOrderByCustomerIdStmt              *sql.Stmt
+	listOrderItemsByBrandIdStmt            *sql.Stmt
+	listOrderItemsByOrderIdStmt            *sql.Stmt
 	listProductInventoryStmt               *sql.Stmt
 	listProductVariantItemsStmt            *sql.Stmt
 	listProductVariantsStmt                *sql.Stmt
@@ -956,6 +1179,8 @@ type Queries struct {
 	listProductsByBrandIDStmt              *sql.Stmt
 	listProductsByCategoryIDStmt           *sql.Stmt
 	listProductsByVendorIDStmt             *sql.Stmt
+	listRiderStmt                          *sql.Stmt
+	listRiderAssignByRiderIdStmt           *sql.Stmt
 	listVariantItemsWithProductDetailsStmt *sql.Stmt
 	listVendorUsersStmt                    *sql.Stmt
 	listVendorsStmt                        *sql.Stmt
@@ -1009,14 +1234,22 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		countZonesByBrandIDStmt:                q.countZonesByBrandIDStmt,
 		createBrandStmt:                        q.createBrandStmt,
 		createBrandCategoryStmt:                q.createBrandCategoryStmt,
+		createBrandOrderStmt:                   q.createBrandOrderStmt,
 		createBrandZoneStmt:                    q.createBrandZoneStmt,
 		createCategoryStmt:                     q.createCategoryStmt,
+		createCustomerStmt:                     q.createCustomerStmt,
+		createCustomerAddressStmt:              q.createCustomerAddressStmt,
+		createDeliveryAddressStmt:              q.createDeliveryAddressStmt,
 		createInventoryHistoryStmt:             q.createInventoryHistoryStmt,
 		createOperationTimeStmt:                q.createOperationTimeStmt,
+		createOrderStmt:                        q.createOrderStmt,
+		createOrderItemStmt:                    q.createOrderItemStmt,
 		createProductStmt:                      q.createProductStmt,
 		createProductInventoryStmt:             q.createProductInventoryStmt,
 		createProductVariantStmt:               q.createProductVariantStmt,
 		createProductVariantItemStmt:           q.createProductVariantItemStmt,
+		createRiderStmt:                        q.createRiderStmt,
+		createRiderAssignStmt:                  q.createRiderAssignStmt,
 		createVendorStmt:                       q.createVendorStmt,
 		createVendorUserStmt:                   q.createVendorUserStmt,
 		createZoneStmt:                         q.createZoneStmt,
@@ -1035,28 +1268,43 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteZoneStmt:                         q.deleteZoneStmt,
 		getBrandStmt:                           q.getBrandStmt,
 		getBrandCategoryStmt:                   q.getBrandCategoryStmt,
+		getBrandOrderStmt:                      q.getBrandOrderStmt,
 		getCategoryStmt:                        q.getCategoryStmt,
+		getCustomerStmt:                        q.getCustomerStmt,
+		getCustomerAddressStmt:                 q.getCustomerAddressStmt,
+		getDeliveryAddressStmt:                 q.getDeliveryAddressStmt,
 		getInventoryHistoryStmt:                q.getInventoryHistoryStmt,
 		getInventoryHistoryByProductIDStmt:     q.getInventoryHistoryByProductIDStmt,
 		getOperationTimeStmt:                   q.getOperationTimeStmt,
+		getOrderStmt:                           q.getOrderStmt,
+		getOrderItemStmt:                       q.getOrderItemStmt,
 		getProductStmt:                         q.getProductStmt,
 		getProductBySlugStmt:                   q.getProductBySlugStmt,
 		getProductInventoryStmt:                q.getProductInventoryStmt,
 		getProductInventoryByProductIDStmt:     q.getProductInventoryByProductIDStmt,
 		getProductVariantStmt:                  q.getProductVariantStmt,
 		getProductVariantItemStmt:              q.getProductVariantItemStmt,
+		getRiderStmt:                           q.getRiderStmt,
+		getRiderAssignStmt:                     q.getRiderAssignStmt,
 		getVendorStmt:                          q.getVendorStmt,
 		getVendorUserStmt:                      q.getVendorUserStmt,
 		getVendorUserByUsernameStmt:            q.getVendorUserByUsernameStmt,
 		getZoneStmt:                            q.getZoneStmt,
 		listBrandCategoriesStmt:                q.listBrandCategoriesStmt,
 		listBrandIdsByVendorIDStmt:             q.listBrandIdsByVendorIDStmt,
+		listBrandOrdersByBrandIdStmt:           q.listBrandOrdersByBrandIdStmt,
+		listBrandOrdersByOrderIdStmt:           q.listBrandOrdersByOrderIdStmt,
 		listBrandZonesStmt:                     q.listBrandZonesStmt,
 		listBrandsStmt:                         q.listBrandsStmt,
 		listBrandsByVendorIDStmt:               q.listBrandsByVendorIDStmt,
 		listCategoriesStmt:                     q.listCategoriesStmt,
+		listCustomerAddressesStmt:              q.listCustomerAddressesStmt,
 		listInventoryHistoryStmt:               q.listInventoryHistoryStmt,
 		listOperationTimesByBrandIdStmt:        q.listOperationTimesByBrandIdStmt,
+		listOrderStmt:                          q.listOrderStmt,
+		listOrderByCustomerIdStmt:              q.listOrderByCustomerIdStmt,
+		listOrderItemsByBrandIdStmt:            q.listOrderItemsByBrandIdStmt,
+		listOrderItemsByOrderIdStmt:            q.listOrderItemsByOrderIdStmt,
 		listProductInventoryStmt:               q.listProductInventoryStmt,
 		listProductVariantItemsStmt:            q.listProductVariantItemsStmt,
 		listProductVariantsStmt:                q.listProductVariantsStmt,
@@ -1064,6 +1312,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		listProductsByBrandIDStmt:              q.listProductsByBrandIDStmt,
 		listProductsByCategoryIDStmt:           q.listProductsByCategoryIDStmt,
 		listProductsByVendorIDStmt:             q.listProductsByVendorIDStmt,
+		listRiderStmt:                          q.listRiderStmt,
+		listRiderAssignByRiderIdStmt:           q.listRiderAssignByRiderIdStmt,
 		listVariantItemsWithProductDetailsStmt: q.listVariantItemsWithProductDetailsStmt,
 		listVendorUsersStmt:                    q.listVendorUsersStmt,
 		listVendorsStmt:                        q.listVendorsStmt,

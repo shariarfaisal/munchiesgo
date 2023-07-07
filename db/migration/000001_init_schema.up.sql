@@ -132,6 +132,108 @@ CREATE TABLE "product_variant_items" (
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
+CREATE TABLE "customers" (
+  "id" bigserial PRIMARY KEY,
+  "name" varchar NOT NULL,
+  "phone" varchar UNIQUE NOT NULL,
+  "email" varchar UNIQUE NOT NULL,
+  "image" varchar NOT NULL,
+  "email_verified" bool NOT NULL DEFAULT false,
+  "nid" varchar NOT NULL,
+  "status" varchar NOT NULL,
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "updated_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
+);
+
+CREATE TABLE "customer_addresses" (
+  "id" bigserial PRIMARY KEY,
+  "customer_id" bigint NOT NULL,
+  "label" varchar NOT NULL,
+  "address" varchar NOT NULL,
+  "geo_point" Point NOT NULL,
+  "apartment" varchar NOT NULL,
+  "area" varchar NOT NULL,
+  "floor" varchar NOT NULL,
+  "created_at" timestamptz NOT NULL DEFAULT (now())
+);
+
+CREATE TABLE "delivery_address" (
+  "id" bigserial PRIMARY KEY,
+  "order_id" bigint NOT NULL,
+  "customer_id" bigint NOT NULL,
+  "address" varchar NOT NULL,
+  "geo_point" Point NOT NULL,
+  "apartment" varchar NOT NULL,
+  "area" varchar NOT NULL,
+  "floor" varchar NOT NULL,
+  "phone" varchar NOT NULL
+);
+
+CREATE TABLE "orders" (
+  "id" bigserial PRIMARY KEY,
+  "customer_id" bigint NOT NULL,
+  "status" varchar NOT NULL,
+  "payment_method" varchar NOT NULL,
+  "payment_status" varchar NOT NULL,
+  "rider_note" varchar NOT NULL,
+  "dispatch_time" timestamptz NOT NULL DEFAULT (now()),
+  "total" float NOT NULL,
+  "total_discount" float NOT NULL DEFAULT 0,
+  "service_charge" float NOT NULL DEFAULT 0,
+  "payable" float NOT NULL,
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "updated_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
+);
+
+CREATE TABLE "order_items" (
+  "id" bigserial PRIMARY KEY,
+  "order_id" bigint NOT NULL,
+  "product_id" bigint NOT NULL,
+  "brand_id" bigint NOT NULL,
+  "price" float NOT NULL,
+  "quantity" int NOT NULL,
+  "discount" float NOT NULL DEFAULT 0,
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "updated_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
+);
+
+CREATE TABLE "brand_orders" (
+  "id" bigserial PRIMARY KEY,
+  "brand_id" bigint NOT NULL,
+  "order_id" bigint NOT NULL,
+  "status" varchar NOT NULL,
+  "total" float NOT NULL,
+  "discount" float NOT NULL DEFAULT 0,
+  "note" varchar NOT NULL DEFAULT ''
+);
+
+CREATE TABLE "rider_assign" (
+  "id" bigserial PRIMARY KEY,
+  "order_id" bigint NOT NULL,
+  "rider_id" bigint NOT NULL,
+  "created_at" timestamptz NOT NULL DEFAULT (now())
+);
+
+CREATE TABLE "riders" (
+  "id" bigserial PRIMARY KEY,
+  "name" varchar NOT NULL,
+  "phone" varchar NOT NULL,
+  "hashed_password" varchar NOT NULL
+);
+
+CREATE TABLE "order_logs" (
+  "id" bigserial PRIMARY KEY,
+  "order_id" bigint NOT NULL,
+  "user_type" varchar NOT NULL,
+  "user_name" varchar NOT NULL,
+  "user_id" bigint NOT NULL,
+  "action_type" varchar NOT NULL,
+  "prev_value" jsonb NOT NULL,
+  "current_value" jsonb NOT NULL,
+  "message" varchar NOT NULL,
+  "created_at" timestamptz NOT NULL DEFAULT (now())
+);
+
 CREATE INDEX ON "vendors" ("name");
 
 CREATE INDEX ON "vendor_users" ("username");
@@ -186,6 +288,26 @@ CREATE INDEX ON "product_variant_items" ("variant_id");
 
 CREATE INDEX ON "product_variant_items" ("product_id", "variant_id");
 
+CREATE INDEX ON "customers" ("phone");
+
+CREATE INDEX ON "customer_addresses" ("customer_id");
+
+CREATE INDEX ON "delivery_address" ("order_id");
+
+CREATE INDEX ON "delivery_address" ("customer_id");
+
+CREATE INDEX ON "orders" ("customer_id");
+
+CREATE INDEX ON "order_items" ("order_id");
+
+CREATE INDEX ON "order_items" ("product_id");
+
+CREATE INDEX ON "order_items" ("brand_id");
+
+CREATE INDEX ON "brand_orders" ("brand_id");
+
+CREATE INDEX ON "brand_orders" ("order_id");
+
 COMMENT ON COLUMN "inventory_history"."type" IS 'it would be like input, sold, restock, damage etc';
 
 ALTER TABLE "vendor_users" ADD FOREIGN KEY ("vendor_id") REFERENCES "vendors" ("id");
@@ -215,3 +337,27 @@ ALTER TABLE "product_variants" ADD FOREIGN KEY ("product_id") REFERENCES "produc
 ALTER TABLE "product_variant_items" ADD FOREIGN KEY ("variant_id") REFERENCES "product_variants" ("id");
 
 ALTER TABLE "product_variant_items" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id");
+
+ALTER TABLE "customer_addresses" ADD FOREIGN KEY ("customer_id") REFERENCES "customers" ("id");
+
+ALTER TABLE "delivery_address" ADD FOREIGN KEY ("order_id") REFERENCES "orders" ("id");
+
+ALTER TABLE "delivery_address" ADD FOREIGN KEY ("customer_id") REFERENCES "orders" ("id");
+
+ALTER TABLE "orders" ADD FOREIGN KEY ("customer_id") REFERENCES "customers" ("id");
+
+ALTER TABLE "order_items" ADD FOREIGN KEY ("order_id") REFERENCES "orders" ("id");
+
+ALTER TABLE "order_items" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id");
+
+ALTER TABLE "order_items" ADD FOREIGN KEY ("brand_id") REFERENCES "brands" ("id");
+
+ALTER TABLE "brand_orders" ADD FOREIGN KEY ("brand_id") REFERENCES "brands" ("id");
+
+ALTER TABLE "brand_orders" ADD FOREIGN KEY ("order_id") REFERENCES "orders" ("id");
+
+ALTER TABLE "rider_assign" ADD FOREIGN KEY ("order_id") REFERENCES "orders" ("id");
+
+ALTER TABLE "rider_assign" ADD FOREIGN KEY ("rider_id") REFERENCES "riders" ("id");
+
+ALTER TABLE "order_logs" ADD FOREIGN KEY ("order_id") REFERENCES "orders" ("id");

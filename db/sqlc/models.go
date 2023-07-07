@@ -38,6 +38,16 @@ type BrandCategory struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
+type BrandOrder struct {
+	ID       int64   `json:"id"`
+	BrandID  int64   `json:"brand_id"`
+	OrderID  int64   `json:"order_id"`
+	Status   string  `json:"status"`
+	Total    float64 `json:"total"`
+	Discount float64 `json:"discount"`
+	Note     string  `json:"note"`
+}
+
 type BrandZone struct {
 	ID        int32     `json:"id"`
 	BrandID   int64     `json:"brand_id"`
@@ -50,6 +60,43 @@ type Category struct {
 	Name      string    `json:"name"`
 	Image     string    `json:"image"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type Customer struct {
+	ID            int64     `json:"id"`
+	Name          string    `json:"name"`
+	Phone         string    `json:"phone"`
+	Email         string    `json:"email"`
+	Image         string    `json:"image"`
+	EmailVerified bool      `json:"email_verified"`
+	Nid           string    `json:"nid"`
+	Status        string    `json:"status"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
+
+type CustomerAddress struct {
+	ID         int64       `json:"id"`
+	CustomerID int64       `json:"customer_id"`
+	Label      string      `json:"label"`
+	Address    string      `json:"address"`
+	GeoPoint   interface{} `json:"geo_point"`
+	Apartment  string      `json:"apartment"`
+	Area       string      `json:"area"`
+	Floor      string      `json:"floor"`
+	CreatedAt  time.Time   `json:"created_at"`
+}
+
+type DeliveryAddress struct {
+	ID         int64       `json:"id"`
+	OrderID    int64       `json:"order_id"`
+	CustomerID int64       `json:"customer_id"`
+	Address    string      `json:"address"`
+	GeoPoint   interface{} `json:"geo_point"`
+	Apartment  string      `json:"apartment"`
+	Area       string      `json:"area"`
+	Floor      string      `json:"floor"`
+	Phone      string      `json:"phone"`
 }
 
 type InventoryHistory struct {
@@ -68,6 +115,47 @@ type OperationTime struct {
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type Order struct {
+	ID            int64     `json:"id"`
+	CustomerID    int64     `json:"customer_id"`
+	Status        string    `json:"status"`
+	PaymentMethod string    `json:"payment_method"`
+	PaymentStatus string    `json:"payment_status"`
+	RiderNote     string    `json:"rider_note"`
+	DispatchTime  time.Time `json:"dispatch_time"`
+	Total         float64   `json:"total"`
+	TotalDiscount float64   `json:"total_discount"`
+	ServiceCharge float64   `json:"service_charge"`
+	Payable       float64   `json:"payable"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
+
+type OrderItem struct {
+	ID        int64     `json:"id"`
+	OrderID   int64     `json:"order_id"`
+	ProductID int64     `json:"product_id"`
+	BrandID   int64     `json:"brand_id"`
+	Price     float64   `json:"price"`
+	Quantity  int32     `json:"quantity"`
+	Discount  float64   `json:"discount"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type OrderLog struct {
+	ID           int64           `json:"id"`
+	OrderID      int64           `json:"order_id"`
+	UserType     string          `json:"user_type"`
+	UserName     string          `json:"user_name"`
+	UserID       int64           `json:"user_id"`
+	ActionType   string          `json:"action_type"`
+	PrevValue    json.RawMessage `json:"prev_value"`
+	CurrentValue json.RawMessage `json:"current_value"`
+	Message      string          `json:"message"`
+	CreatedAt    time.Time       `json:"created_at"`
 }
 
 type Product struct {
@@ -112,6 +200,20 @@ type ProductVariantItem struct {
 	ID        int64     `json:"id"`
 	VariantID int64     `json:"variant_id"`
 	ProductID int64     `json:"product_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type Rider struct {
+	ID             int64  `json:"id"`
+	Name           string `json:"name"`
+	Phone          string `json:"phone"`
+	HashedPassword string `json:"hashed_password"`
+}
+
+type RiderAssign struct {
+	ID        int64     `json:"id"`
+	OrderID   int64     `json:"order_id"`
+	RiderID   int64     `json:"rider_id"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
